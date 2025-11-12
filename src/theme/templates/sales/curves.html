@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold">Curvas de Ventas (acumuladas) vs Stock</h1>
+    <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong> por
+      <strong>Sucursal</strong> o, si no elegís sucursal, por <strong>Zona/Región</strong>.
+    </p>
+  </div>
+
+  <form id="filters" class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-base-100 p-4 rounded-xl shadow">
+    <div>
+      <label class="label"><span class="label-text">Región</span></label>
+      <select class="select select-bordered w-full" name="region_id" id="region">
+        <option value="">Todas</option>
+        {% for r in regions %}
+          <option value="{{ r.id }}">{{ r.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Zona</span></label>
+      <select class="select select-bordered w-full" name="zone_id" id="zone" disabled>
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Sucursal</span></label>
+      <select class="select select-bordered w-full" name="store_code" id="store" disabled>
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="label"><span class="label-text">Familia (origen)</span></label>
+      <select class="select select-bordered w-full" name="family_id" id="family">
+        <option value="">Todas</option>
+        {% for f in families %}
+          <option value="{{ f.id }}">{{ f.origen }} ▸ {{ f.familia_std }} ▸ {{ f.subfamilia_std }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-5 text-right">
+      <button type="submit" class="btn btn-primary">Actualizar gráfico</button>
+    </div>
+  </form>
+
+  <div class="bg-base-100 p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">Ventas acumuladas (3 años comparados)</h2>
+    <canvas id="curveChart" height="120"></canvas>
+    <p id="metaInfo" class="text-xs opacity-60 mt-2"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* URLs de backend generadas por Django (evita hardcodear rutas) */
+const ZONES_URL  = "{% url 'core:zones_by_region' %}";
+const STORES_URL = "{% url 'core:stores_by_zone' %}";
+
+const $region = document.getElementById('region');
+const $zone   = document.getElementById('zone');
+const $store  = document.getElementById('store');
+const $form   = document.getElementById('filters');
+const ctx     = document.getElementById('curveChart').getContext('2d');
+let chart;
+
+function resetSelect($el, placeholder) {
+  $el.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = '';
+  opt.textContent = placeholder || 'Todas';
+  $el.appendChild(opt);
+}
+
+async function loadZones(regionId) {
+  resetSelect($zone, 'Todas');
+  resetSelect($store, 'Todas');
+  $zone.disabled = true;
+  $store.disabled = true;
+
+  if (!regionId) { $zone.disabled = false; $store.disabled = false; return; }
+
+  try {
+    const r = await fetch(`${ZONES_URL}?region_id=${encodeURIComponent(regionId)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    for (const z of (data.items || [])) {
+      const opt = document.createElement('option');
+      opt.value = z.id; opt.textContent = z.name;
+      $zone.appendChild(opt);
+    }
+  } catch (e) {
+    console.error("Error cargando zonas:", e);
+  } finally {
+    $zone.disabled = false; // habilitamos aunque venga vacío -> “Todas”
+  }
+}
+
+async function loadStores(zoneId) {
+  resetSelect($store, 'Todas');
+  $store.disabled = true;
+
+  if (!zoneId) { $store.disabled = false; return; }
+
+  try {
+    const r = await fetch(`${STORES_URL}?zone_id=${encodeURIComponent(zoneId)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    for (const s of (data.items || [])) {
+      const opt = document.createElement('option');
+      opt.value = s.id; opt.textContent = s.label;
+      $store.appendChild(opt);
+    }
+  } catch (e) {
+    console.error("Error cargando sucursales:", e);
+  } finally {
+    $store.disabled = false;
+  }
+}
+
+$region.addEventListener('change', e => {
+  loadZones(e.target.value);
+});
+
+$zone.addEventListener('change', e => {
+  loadStores(e.target.value);
+});
+
+// Si se elige sucursal manualmente, el backend igual fuerza coherencia.
+// Si quisieras, acá podrías bloquear región/zona para evitar confusiones.
+$store.addEventListener('change', e => { /* opcional */ });
+
+function fetchData() {
+  const params = new URLSearchParams(new FormData($form));
+  fetch(`/sales/curves/data/?${params.toString()}`)
+    .then(r => r.json())
+    .then(d => {
+      // Mantener solo datasets con suma numérica > 0
+      const filtered = (d.datasets || []).filter(ds => {
+        const total = (ds.data || []).reduce((acc, v) => acc + (Number(v) || 0), 0);
+        return total > 0;
+      });
+
+      if (filtered.length === 0) {
+        if (chart) chart.destroy();
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        document.getElementById('metaInfo').textContent =
+          "Sin datos para el filtro seleccionado.";
+        return;
+      }
+
+      const labels = d.labels;
+      const ds = filtered.map(it => ({
+        label: it.label,
+        data: it.data.map(x => Number(x) || 0),
+        tension: 0.3,
+        borderWidth: 2,
+      }));
+
+      const config = {
+        type: 'line',
+        data: { labels, datasets: ds },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+          plugins: { legend: { position: 'top' } }
+        }
+      };
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, config);
+
+      const note = d.meta?.note || '';
+      const years = d.meta?.years_compared?.join(', ');
+      document.getElementById('metaInfo').textContent =
+        `Años comparados: ${years || '-'}${note ? ' · ' + note : ''}`;
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('metaInfo').textContent = "Error al cargar los datos.";
+    });
+}
+
+
+$form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  fetchData();
+});
+
+// Primera carga + si ya hay región preseleccionada, inicializar cascada
+document.addEventListener('DOMContentLoaded', async () => {
+  if ($region.value) {
+    await loadZones($region.value);
+    if ($zone.value) {
+      await loadStores($zone.value);
+    }
+  }
+  fetchData();
+});
+</script>
+{% endblock %}

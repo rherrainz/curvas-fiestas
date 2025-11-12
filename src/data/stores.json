@@ -1,0 +1,1124 @@
+[
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "4",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "5",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "6",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "7",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "8",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "9",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "10",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "11",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "12",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "13",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "14",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "15",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "16",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "17",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "18",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "19",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "21",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "22",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "23",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "24",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "25",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "31",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "32",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "33",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "35",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "36",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "37",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "38",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "40",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "42",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "43",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "44",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "45",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "46",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "47",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "48",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "50",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "51",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "52",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "53",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "54",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "55",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "56",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "57",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "58",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "63",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "64",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "65",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "67",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "68",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "69",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "72",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "74",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "75",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "76",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "78",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "79",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "81",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "84",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "85",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "89",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "90",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "91",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "92",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "96",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "97",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "99",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "100",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "101",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "102",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "103",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "104",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "105",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "109",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "114",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "117",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "118",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "119",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "122",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "124",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "125",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "127",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "131",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "134",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "138",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "140",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "141",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "143",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "145",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "147",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "148",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "149",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "150",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "151",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "152",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "153",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "156",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "159",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "160",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "161",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "162",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "163",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "164",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "165",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "166",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "167",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "168",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "171",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "172",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "173",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "175",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "BARILOCHE",
+    "sucursal_id": "177",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "179",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "181",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "182",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "183",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "184",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "185",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "186",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "187",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "188",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "189",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "191",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "192",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "195",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "196",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "197",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "198",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "199",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "200",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "201",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "202",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "LA PAMPA",
+    "sucursal_id": "203",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "204",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "205",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "206",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "TRELEW",
+    "sucursal_id": "207",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "208",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "209",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "211",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "212",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "213",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "214",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "215",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "VIEDMA",
+    "sucursal_id": "216",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "217",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "COMODORO RIVADAVIA",
+    "sucursal_id": "218",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "TIERRA DEL FUEGO",
+    "sucursal_id": "220",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "221",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "225",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "226",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "227",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "228",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "229",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "230",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "232",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "233",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "234",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "235",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "236",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "237",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "238",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "239",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "240",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "241",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "242",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "243",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "246",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "247",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "248",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN CIUDAD",
+    "sucursal_id": "254",
+    "CDR": "TRUE"
+  },
+  {
+    "region": "PAMPA ANDINA",
+    "zona": "ESQUEL",
+    "sucursal_id": "257",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "259",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "BUENOS AIRES",
+    "sucursal_id": "260",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "261",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ NORTE",
+    "sucursal_id": "263",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "264",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "265",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "266",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "CORDOBA - SANTA FE",
+    "sucursal_id": "351",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "356",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "NEUQUEN INTERIOR",
+    "sucursal_id": "357",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "359",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "SUR",
+    "zona": "SANTA CRUZ SUR",
+    "sucursal_id": "360",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "361",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "CENTRO",
+    "zona": "RIO NEGRO",
+    "sucursal_id": "363",
+    "CDR": "FALSE"
+  },
+  {
+    "region": "NORTE",
+    "zona": "LITORAL",
+    "sucursal_id": "368",
+    "CDR": "FALSE"
+  }
+]

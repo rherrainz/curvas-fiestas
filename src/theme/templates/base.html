@@ -1,0 +1,22 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retail Curves</title>
+  <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="navbar bg-base-100 shadow">
+    <div class="max-w-6xl mx-auto w-full p-2">
+      <a href="/" class="font-bold">Curvas Fiestas 2025 - LA</a>
+      <a href="/sales/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Ventas</a>
+      <a href="/stock/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Stock</a>
+      <a href="/imports/upload/" class="btn btn-ghost btn-sm ml-4">Importar</a>
+
+    </div>
+  </div>
+  {% block content %}{% endblock %}
+</body>
+</html>

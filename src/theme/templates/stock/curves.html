@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold">Curvas de Stock (diario)</h1>
+    <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong>. Fuente: tiendas/CDR.</p>
+  </div>
+
+  <form id="filters" class="grid grid-cols-1 md:grid-cols-6 gap-4 bg-base-100 p-4 rounded-xl shadow">
+    <div>
+      <label class="label"><span class="label-text">Fuente</span></label>
+      <select class="select select-bordered w-full" name="source" id="source">
+        <option value="all"    {% if default_source == 'all' %}selected{% endif %}>Tiendas + CDR</option>
+        <option value="stores" {% if default_source == 'stores' %}selected{% endif %}>Solo Tiendas</option>
+        <option value="cdr"    {% if default_source == 'cdr' %}selected{% endif %}>Solo CDR</option>
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Región</span></label>
+      <select class="select select-bordered w-full" name="region_id" id="region">
+        <option value="">Todas</option>
+        {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Zona</span></label>
+      <select class="select select-bordered w-full" name="zone_id" id="zone" disabled>
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Sucursal</span></label>
+      <select class="select select-bordered w-full" name="store_code" id="store" disabled>
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <div class="md:col-span-3">
+      <label class="label"><span class="label-text">Familia (origen)</span></label>
+      <select class="select select-bordered w-full" name="family_id" id="family">
+        <option value="">Todas</option>
+        {% for f in families %}
+          <option value="{{ f.id }}">{{ f.origen }} ▸ {{ f.familia_std }} ▸ {{ f.subfamilia_std }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-6 text-right">
+      <button type="submit" class="btn btn-primary">Actualizar gráfico</button>
+    </div>
+  </form>
+
+  <div class="bg-base-100 p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">Stock diario (3 años comparados)</h2>
+    <canvas id="stockChart" height="120"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ZONES_URL  = "{% url 'core:zones_by_region' %}";
+const STORES_URL = "{% url 'core:stores_by_zone' %}";
+const STORE_URL  = "{% url 'core:store_info' %}";
+
+const $region = document.getElementById('region');
+const $zone   = document.getElementById('zone');
+const $store  = document.getElementById('store');
+const $form   = document.getElementById('filters');
+const ctx     = document.getElementById('stockChart').getContext('2d');
+let chart;
+
+function resetSelect($el, placeholder) {
+  $el.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = ''; opt.textContent = placeholder || 'Todas';
+  $el.appendChild(opt);
+}
+
+async function loadZones(regionId) {
+  resetSelect($zone,'Todas'); resetSelect($store,'Todas');
+  $zone.disabled = true; $store.disabled = true;
+  if (!regionId) { $zone.disabled=false; $store.disabled=false; return; }
+  try {
+    const r = await fetch(`${ZONES_URL}?region_id=${encodeURIComponent(regionId)}`);
+    const data = await r.json();
+    for (const z of (data.items||[])) {
+      const o = document.createElement('option'); o.value=z.id; o.textContent=z.name; $zone.appendChild(o);
+    }
+  } finally { $zone.disabled=false; }
+}
+async function loadStores(zoneId) {
+  resetSelect($store,'Todas'); $store.disabled = true;
+  if (!zoneId) { $store.disabled=false; return; }
+  try {
+    const r = await fetch(`${STORES_URL}?zone_id=${encodeURIComponent(zoneId)}`);
+    const data = await r.json();
+    for (const s of (data.items||[])) {
+      const o = document.createElement('option'); o.value=s.id; o.textContent=s.label; $store.appendChild(o);
+    }
+  } finally { $store.disabled=false; }
+}
+
+$region.addEventListener('change', e => loadZones(e.target.value));
+$zone.addEventListener('change',   e => loadStores(e.target.value));
+
+// Al elegir sucursal: sincronizar región/zona automáticamente (evita combinaciones inválidas)
+$store.addEventListener('change', async (e) => {
+  const code = e.target.value;
+  if (!code) return;
+  const r = await fetch(`${STORE_URL}?code=${encodeURIComponent(code)}`);
+  const data = await r.json();
+  if (!data.ok) return;
+  // setear región y recargar zonas/tiendas en cascada
+  $region.value = data.region.id;
+  await loadZones(data.region.id);
+  $zone.value = data.zone.id;
+  await loadStores(data.zone.id);
+  $store.value = code;  // re-seleccionar
+});
+
+function fetchData() {
+  const params = new URLSearchParams(new FormData($form));
+  fetch(`/stock/curves/data/?${params.toString()}`)
+    .then(r => r.json())
+    .then(d => {
+      // filtrar series planas
+      const filtered = (d.datasets||[]).filter(ds => (ds.data||[]).reduce((a,v)=>a+(Number(v)||0),0) > 0);
+      if (filtered.length === 0) {
+        if (chart) chart.destroy();
+        ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        return;
+      }
+      
+      const ds = filtered.map(it => ({
+        label: it.label,
+        // Si el valor es 0 o null, lo mostramos como null (Chart.js no dibuja)
+        data: it.data.map(v => {
+          const n = Number(v);
+          return n === 0 ? null : n;
+        }),
+        tension: 0.3,
+        borderWidth: 2,
+        spanGaps: true, // 🔹 Une los tramos con datos, sin línea en los nulls
+      }));
+
+
+      const cfg = { type:'line', data:{labels:d.labels, datasets:ds},
+        options:{ responsive:true, interaction:{mode:'index',intersect:false},
+          scales:{ y:{ beginAtZero:true, ticks:{precision:0} } }, plugins:{ legend:{position:'top'} } } };
+      if (chart) chart.destroy(); chart = new Chart(ctx, cfg);
+    })
+    .catch(console.error);
+}
+
+$form.addEventListener('submit', e => { e.preventDefault(); fetchData(); });
+
+// init
+document.addEventListener('DOMContentLoaded', async () => { fetchData(); });
+</script>
+{% endblock %}

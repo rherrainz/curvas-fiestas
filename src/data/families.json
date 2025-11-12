@@ -1,0 +1,10 @@
+[
+  {"origen":"PANIFICADOS","sector":"ALMACEN","familia_std":"Productos Panificados","subfamilia_std":"Budines Tradicionales"},
+  {"origen":"PRODUCTOS PARA FIESTAS","sector":"ALMACEN","familia_std":"Productos Panificados","subfamilia_std":"Pan Dulce y Budines Navideños"},
+  {"origen":"GOLOSINAS","sector":"ALMACEN","familia_std":"Golosinas y Kiosko","subfamilia_std":"Postre de Maní"},
+  {"origen":"GOLOSINAS PARA EVENTOS","sector":"ALMACEN","familia_std":"Golosinas y Kiosko","subfamilia_std":"Confituras"},
+  {"origen":"SIDRAS","sector":"BEBIDAS","familia_std":"Bebidas Fiestas","subfamilia_std":"Sidras"},
+  {"origen":"VINOS ESPUMANTES","sector":"BEBIDAS","familia_std":"Bebidas Fiestas","subfamilia_std":"Champañas"},
+  {"origen":"FRUTOS SECOS","sector":"FRUTAS Y VERDURAS","familia_std":"Frutos Secos y Desecados","subfamilia_std":"Frutos Secos"},
+  {"origen":"FRUTOS DESECADOS","sector":"FRUTAS Y VERDURAS","familia_std":"Frutos Secos y Desecados","subfamilia_std":"Frutos Desecados"}
+]
