@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Importar ventas + stock (1/10–31/12)</h1>
+
+  {% if messages %}
+    <div class="space-y-2 mb-4">
+      {% for m in messages %}
+        <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %}">
+          <span>{{ m }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-4 bg-base-100 p-4 rounded-xl shadow">
+    {% csrf_token %}
+    <div class="form-control">
+      <label class="label"><span class="label-text">Archivo XLSX/CSV/TSV</span></label>
+      {{ form.file }}
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="form-control">
+        <label class="label"><span class="label-text">Hoja (Excel)</span></label>
+        {{ form.sheet }}
+      </div>
+      <div class="form-control">
+        <label class="label"><span class="label-text">Zero-padding sucursal</span></label>
+        {{ form.pad }}
+      </div>
+      <div class="form-control">
+        <label class="cursor-pointer label">
+          <span class="label-text">Validar Región/Zona</span>
+          {{ form.strict_area }}
+        </label>
+      </div>
+    </div>
+    <button class="btn btn-primary">Procesar</button>
+  </form>
+
+  {% if result %}
+    <div class="mt-6 bg-base-100 p-4 rounded-xl shadow">
+      <h2 class="text-xl font-semibold mb-2">Resumen de carga</h2>
+      <ul class="list-disc ml-6">
+        <li>Filas leídas: {{ result.rows }}</li>
+        <li>Stock → creados: {{ result.stock_created }}, actualizados: {{ result.stock_updated }}, omitidos: {{ result.stock_skipped }}</li>
+        <li>Ventas → creados: {{ result.sales_created }}, actualizados: {{ result.sales_updated }}, omitidos: {{ result.sales_skipped }}</li>
+      </ul>
+    </div>
+  {% endif %}
+  {% if result.detected_columns %}
+  <p class="text-sm opacity-70">Columnas detectadas: {{ result.detected_columns|join:", " }}</p>
+{% endif %}
+</div>
+{% endblock %}
