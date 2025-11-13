@@ -1,0 +1,257 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="max-w-7xl mx-auto p-6 space-y-6">
+  <h1 class="text-3xl font-bold">Situación Actual vs Año Anterior</h1>
+  <p class="text-sm opacity-70">
+    Stock del día + Ventas acumuladas (a la fecha de corte) comparadas contra
+    las ventas totales del año anterior.
+  </p>
+
+  <form
+    id="filters"
+    class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-base-100 p-4 rounded-xl shadow"
+  >
+    <div>
+      <label class="label"><span class="label-text">Región</span></label>
+      <select
+        class="select select-bordered w-full"
+        name="region_id"
+        id="region"
+      >
+        <option value="">Todas</option>
+        {% for r in regions %}
+        <option value="{{ r.id }}">{{ r.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="label"><span class="label-text">Zona</span></label>
+      <select
+        class="select select-bordered w-full"
+        name="zone_id"
+        id="zone"
+        disabled
+      >
+        <option value="">Todas</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="label"><span class="label-text">Sucursal</span></label>
+      <select
+        class="select select-bordered w-full"
+        name="store_code"
+        id="store"
+        disabled
+      >
+        <option value="">Todas</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="label"><span class="label-text">Día (corte)</span></label>
+      <select
+        class="select select-bordered w-full"
+        name="cut_date"
+        id="cut_date"
+      >
+        <!-- se llena por JS -->
+      </select>
+    </div>
+
+    <div class="md:col-span-4 text-right">
+      <button type="submit" class="btn btn-primary">Actualizar</button>
+    </div>
+  </form>
+
+  <div class="bg-base-100 p-4 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-2">
+      Situación por Sucursal y SubFamilia
+    </h2>
+    <p id="cutInfo" class="text-xs opacity-60 mb-2"></p>
+    <div class="overflow-x-auto">
+      <table class="table table-compact table-zebra">
+        <thead>
+          <tr>
+            <th>SubFamilia</th>
+            <th>UV Act Acum</th>
+            <th>Stock Actual</th>
+            <th>Stk + Vta Act Acum</th>
+            <th>UV Totales Año Ant</th>
+            <th>Stk+Vta Act / UV Ant</th>
+            <th>UV Act/Ant</th>
+          </tr>
+        </thead>
+        <tbody id="insightsBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mt-2 text-xs opacity-70">
+  <strong>Semáforo:</strong>
+  🟢 &gt; +10% · 🟡 entre -10% y +10% · 🔴 &lt; -10% vs UV año anterior.
+</p>
+
+</div>
+
+<script>
+  const ZONES_URL = "{% url 'core:zones_by_region' %}";
+  const STORES_URL = "{% url 'core:stores_by_zone' %}";
+  const DATA_URL = "{% url 'insights:overview_data' %}";
+
+  const $region = document.getElementById("region");
+  const $zone = document.getElementById("zone");
+  const $store = document.getElementById("store");
+  const $cutDate = document.getElementById("cut_date");
+  const $form = document.getElementById("filters");
+  const $tbody = document.getElementById("insightsBody");
+  const $cutInfo = document.getElementById("cutInfo");
+
+  function resetSelect($el, ph) {
+    $el.innerHTML = `<option value="">${ph || "Todas"}</option>`;
+  }
+
+  function semaforoClass(pct) {
+    if (pct == null) return "";
+    if (pct > 10) return "text-success font-semibold"; // > +10% → verde
+    if (pct < -10) return "text-error font-semibold"; // < -10% → rojo
+    return "text-warning font-semibold"; // entre -10% y +10% → amarillo
+  }
+
+  function semaforoEmoji(pct) {
+    if (pct == null) return "—";
+    if (pct > 10) return "🟢"; // más del 10% arriba del año pasado
+    if (pct < -10) return "🔴"; // más del 10% abajo del año pasado
+    return "🟡"; // rango neutro
+  }
+
+  $region.addEventListener("change", async (e) => {
+    resetSelect($zone, "Todas");
+    resetSelect($store, "Todas");
+    $zone.disabled = true;
+    $store.disabled = true;
+
+    const rid = e.target.value;
+    if (!rid) {
+      $zone.disabled = false;
+      $store.disabled = false;
+      return;
+    }
+    const r = await fetch(`${ZONES_URL}?region_id=${rid}`);
+    const data = await r.json();
+    (data.items || []).forEach((z) => {
+      $zone.insertAdjacentHTML(
+        "beforeend",
+        `<option value="${z.id}">${z.name}</option>`
+      );
+    });
+    $zone.disabled = false;
+  });
+
+  $zone.addEventListener("change", async (e) => {
+    resetSelect($store, "Todas");
+    $store.disabled = true;
+
+    const zid = e.target.value;
+    if (!zid) {
+      $store.disabled = false;
+      return;
+    }
+    const r = await fetch(`${STORES_URL}?zone_id=${zid}`);
+    const data = await r.json();
+    (data.items || []).forEach((s) => {
+      $store.insertAdjacentHTML(
+        "beforeend",
+        `<option value="${s.id}">${s.label}</option>`
+      );
+    });
+    $store.disabled = false;
+  });
+
+  // ---- llenar select de fechas: desde 01/10 hasta ayer, empezando por ayer ----
+  function fillCutDateOptions() {
+    const today = new Date();
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1
+    );
+    const year = yesterday.getFullYear();
+    const start = new Date(year, 9, 1); // 1/oct (mes 9 = octubre, 0-based)
+
+    $cutDate.innerHTML = "";
+
+    let firstValue = null;
+    for (let d = new Date(yesterday); d >= start; d.setDate(d.getDate() - 1)) {
+      const iso = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const text = `${dd}/${mm}/${year}`;
+      if (!firstValue) firstValue = iso;
+      const opt = document.createElement("option");
+      opt.value = iso;
+      opt.textContent = text;
+      $cutDate.appendChild(opt);
+    }
+    if (firstValue) {
+      $cutDate.value = firstValue; // ayer por defecto
+    }
+  }
+
+  function n(x, dec = 0) {
+    if (x === null || x === undefined) return "—";
+    return Number(x).toLocaleString("es-AR", {
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec,
+    });
+  }
+
+  async function fetchData() {
+    const params = new URLSearchParams(new FormData($form));
+    const r = await fetch(`${DATA_URL}?${params.toString()}`);
+    const d = await r.json();
+
+    const meta = d.meta || {};
+    $cutInfo.textContent = `Corte: ${meta.cut_date || "-"} · Año actual: ${
+      meta.pivot_year || "-"
+    } · Año anterior: ${meta.prev_year || "-"}`;
+
+    $tbody.innerHTML = "";
+
+    (d.rows || []).forEach((row) => {
+      const ratio1 = row.ratio_stkplus_vs_prev; // factor
+      const ratio2 = row.ratio_uv_act_vs_prev; // factor
+
+      const pct1 = ratio1 != null ? (ratio1 - 1) * 100 : null;
+      const pct2 = ratio2 != null ? (ratio2 - 1) * 100 : null;
+
+      const emoji1 = semaforoEmoji(pct1);
+      const emoji2 = semaforoEmoji(pct2);
+
+      $tbody.insertAdjacentHTML(
+        "beforeend",
+        `
+    <tr>
+      <td>${row.subfamily || "—"}</td>
+      <td>${n(row.uv_act_cum)}</td>
+      <td>${n(row.stock_act)}</td>
+      <td class="font-semibold">${n(row.stock_plus_uv_act)}</td>
+      <td>${n(row.uv_prev_total)}</td>
+      <td>${emoji1} ${pct1 != null ? n(pct1, 1) + "%" : ""}</td>
+      <td>${emoji2} ${pct2 != null ? n(pct2, 1) + "%" : ""}</td>
+    </tr>
+  `
+      );
+    });
+  }
+
+  $form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    fetchData();
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fillCutDateOptions();
+    fetchData();
+  });
+</script>
+{% endblock %}

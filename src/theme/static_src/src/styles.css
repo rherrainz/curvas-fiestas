@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@layer theme {
+  [data-theme="la-navidad"] {
+    color-scheme: light;
+    --color-primary: #B33643;
+    --color-primary-focus: #8D2A35;
+    --color-primary-content: #ffffff;
+    --color-secondary: #2E5C4B;
+    --color-secondary-focus: #264A3D;
+    --color-secondary-content: #ffffff;
+    --color-accent: #C8A95E;
+    --color-accent-focus: #B2934E;
+    --color-accent-content: #1F1F1F;
+    --color-neutral: #1F1F1F;
+    --color-neutral-content: #F6F2E8;
+    --color-base-100: #F6F2E8;
+    --color-base-200: #EAE6DA;
+    --color-base-300: #DDD6C6;
+    --color-info: #2E5C4B;
+    --color-success: #2E5C4B;
+    --color-warning: #C8A95E;
+    --color-error: #B33643;
+  }
+}
+
 /**
   * A catch-all path to Django template files, JavaScript, and Python files
   * that contain Tailwind CSS classes and will be scanned by Tailwind to generate the final CSS file.
