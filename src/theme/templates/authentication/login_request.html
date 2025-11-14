@@ -55,9 +55,9 @@
       </div>
 
       <!-- Right Panel: Info (Hidden on mobile, visible on desktop) -->
-      <div class="hidden lg:flex flex-col space-y-6">
+      <div class="hidden lg:grid lg:grid-cols-2 gap-6">
         <!-- Info Box -->
-        <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 mx-auto max-w-prose text-left">
+        <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 text-left">
           <p class="font-semibold text-info text-lg">¿Cómo funciona?</p>
           <ol class="list-decimal list-inside space-y-2 opacity-80 text-base">
             <li>Ingresa tu email corporativo</li>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Security Info -->
-        <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4 mx-auto max-w-prose text-left">
+        <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4 text-left">
           <p class="font-semibold text-success text-lg">🔒 Seguridad</p>
           <ul class="space-y-2 opacity-80 text-base">
             <li>✓ Sin contraseñas</li>
@@ -79,7 +79,7 @@
         </div>
 
         <!-- Footer Info -->
-        <div class="text-sm opacity-50">
+        <div class="text-sm opacity-50 lg:col-span-2">
           <p>Este sistema solo permite acceso</p>
           <p>a empleados de {{ allowed_domain }}</p>
         </div>
