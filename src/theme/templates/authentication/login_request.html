@@ -6,7 +6,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
       <!-- Left Panel: Form -->
       <div class="w-full">
-        <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+        <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 mx-auto text-center">
           <!-- Header -->
           <div class="text-center lg:text-left space-y-2">
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold">Acceso Corporativo</h1>
@@ -24,7 +24,7 @@
           {% endif %}
 
           <!-- Form -->
-          <form method="post" class="space-y-4 sm:space-y-5">
+          <form method="post" class="space-y-4 sm:space-y-5 text-left">
             {% csrf_token %}
             
             <div class="form-control">
@@ -56,7 +56,7 @@
       <!-- Right Panel: Info (Hidden on mobile, visible on desktop) -->
       <div class="hidden lg:flex flex-col space-y-6">
         <!-- Info Box -->
-        <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4">
+        <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 mx-auto max-w-prose text-left">
           <p class="font-semibold text-info text-lg">¿Cómo funciona?</p>
           <ol class="list-decimal list-inside space-y-2 opacity-80 text-base">
             <li>Ingresa tu email corporativo</li>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- Security Info -->
-        <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4">
+        <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4 mx-auto max-w-prose text-left">
           <p class="font-semibold text-success text-lg">🔒 Seguridad</p>
           <ul class="space-y-2 opacity-80 text-base">
             <li>✓ Sin contraseñas</li>
