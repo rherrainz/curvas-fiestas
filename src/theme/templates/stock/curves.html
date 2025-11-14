@@ -131,17 +131,45 @@ function fetchData() {
         return;
       }
       
-      const ds = filtered.map(it => ({
-        label: it.label,
-        // Si el valor es 0 o null, lo mostramos como null (Chart.js no dibuja)
-        data: it.data.map(v => {
-          const n = Number(v);
-          return n === 0 ? null : n;
-        }),
-        tension: 0.3,
-        borderWidth: 2,
-        spanGaps: true, // 🔹 Une los tramos con datos, sin línea en los nulls
-      }));
+      // Obtener paleta desde variables CSS del tema
+      function getThemeColors() {
+        const s = getComputedStyle(document.documentElement);
+        const keys = [
+          '--color-primary', '--color-secondary', '--color-accent', '--color-neutral',
+          '--color-info', '--color-success', '--color-warning', '--color-error'
+        ];
+        return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
+      }
+      function hexToRgba(hex, a) {
+        if (!hex) return null;
+        const h = hex.replace('#','');
+        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+        const bigint = parseInt(full, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      }
+
+      const palette = getThemeColors();
+      const ds = filtered.map((it, idx) => {
+        const color = palette[idx % palette.length] || '#333333';
+        return {
+          label: it.label,
+          // Si el valor es 0 o null, lo mostramos como null (Chart.js no dibuja)
+          data: it.data.map(v => {
+            const n = Number(v);
+            return n === 0 ? null : n;
+          }),
+          tension: 0.3,
+          borderWidth: 2,
+          spanGaps: true, // 🔹 Une los tramos con datos, sin línea en los nulls
+          borderColor: color,
+          backgroundColor: hexToRgba(color, 0.12),
+          pointBackgroundColor: color,
+          fill: false,
+        };
+      });
 
 
       const cfg = { type:'line', data:{labels:d.labels, datasets:ds},
