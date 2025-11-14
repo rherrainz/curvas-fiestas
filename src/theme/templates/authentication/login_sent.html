@@ -64,20 +64,24 @@
           <div class="break-all bg-base-300 p-3 rounded text-xs font-mono overflow-x-auto">
             {{ login_link }}
           </div>
-          <a href="{{ login_link }}" class="btn btn-primary btn-sm w-full text-xs sm:text-sm">
-            ✓ Acceder ahora (desarrollo)
-          </a>
+          <div class="flex justify-center">
+            <a href="{{ login_link }}" class="btn btn-primary btn-sm text-xs sm:text-sm">
+              ✓ Acceder ahora (desarrollo)
+            </a>
+          </div>
         </div>
       {% endif %}
 
       <!-- Resend Option -->
-      <a href="{% url 'authentication:login_request' %}" class="btn btn-outline btn-sm w-full text-xs sm:text-sm">
-        {% if debug %}
-          ¿Necesitas otro enlace?
-        {% else %}
-          ¿No recibiste el email? Intenta de nuevo
-        {% endif %}
-      </a>
+      <div class="flex justify-center">
+        <a href="{% url 'authentication:login_request' %}" class="btn btn-outline btn-sm text-xs sm:text-sm">
+          {% if debug %}
+            ¿Necesitas otro enlace?
+          {% else %}
+            ¿No recibiste el email? Intenta de nuevo
+          {% endif %}
+        </a>
+      </div>
 
       <!-- Support -->
       <div class="text-center text-xs opacity-50 space-y-1">
