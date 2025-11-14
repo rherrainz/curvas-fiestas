@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 p-4">
-  <div class="w-full max-w-md">
-    <div class="bg-base-100 rounded-2xl shadow-2xl p-8 space-y-6">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 p-4 sm:p-6 md:p-8">
+  <div class="w-full max-w-2xl">
+    <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 space-y-6">
       <!-- Error Icon -->
       <div class="flex justify-center">
-        <div class="rounded-full bg-error/20 p-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="rounded-full bg-error/20 p-4 sm:p-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-14 sm:w-14 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
@@ -15,30 +15,40 @@
 
       <!-- Header -->
       <div class="text-center space-y-2">
-        <h1 class="text-3xl font-bold">Acceso Denegado</h1>
-        <p class="text-sm opacity-70">No pudimos processar tu solicitud de acceso</p>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">Acceso Denegado</h1>
+        <p class="text-sm sm:text-base opacity-70">No pudimos processar tu solicitud de acceso</p>
       </div>
 
       <!-- Error Message -->
-      <div class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <div class="alert alert-error text-sm sm:text-base">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2" />
         </svg>
         <span>{{ error }}</span>
       </div>
 
       <!-- Reasons -->
-      <div class="bg-base-200 rounded-lg p-4 space-y-2">
-        <p class="font-semibold text-sm mb-2">Esto puede ocurrir si:</p>
-        <ul class="list-disc list-inside text-sm opacity-75 space-y-1">
+      <div class="bg-base-200 rounded-xl p-4 sm:p-6 space-y-3">
+        <p class="font-semibold text-sm sm:text-base mb-2">Esto puede ocurrir si:</p>
+        <ul class="list-disc list-inside text-xs sm:text-sm opacity-75 space-y-2">
           <li>El enlace ya fue utilizado</li>
           <li>El enlace expiró (30 minutos)</li>
           <li>El token es inválido</li>
         </ul>
       </div>
 
+      <!-- Tips -->
+      <div class="bg-warning/10 border border-warning/20 rounded-xl p-4 sm:p-6 space-y-2">
+        <p class="font-semibold text-warning text-sm sm:text-base">💡 Consejos:</p>
+        <ul class="text-xs sm:text-sm opacity-80 space-y-1">
+          <li>• Solicita un nuevo enlace usando el botón de abajo</li>
+          <li>• Asegúrate de usar tu email corporativo</li>
+          <li>• El enlace es válido solo por 30 minutos</li>
+        </ul>
+      </div>
+
       <!-- Action -->
-      <a href="{% url 'authentication:login_request' %}" class="btn btn-primary btn-lg w-full">
+      <a href="{% url 'authentication:login_request' %}" class="btn btn-primary w-full text-sm sm:text-base">
         Solicitar Nuevo Acceso
       </a>
 
