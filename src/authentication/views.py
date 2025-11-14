@@ -8,7 +8,9 @@ from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
+from django.conf import settings
 from .models import LoginToken
+from .email_service import send_login_email
 from datetime import timedelta
 import logging
 
@@ -73,12 +75,16 @@ class LoginRequestView(View):
             reverse('authentication:verify_token', kwargs={"token": token})
         )
 
+        # Enviar email (o log en desarrollo)
+        send_login_email(email, login_link, TOKEN_EXPIRY_MINUTES)
+
         logger.info(f"Token de login generado para {email}")
 
         return render(request, "authentication/login_sent.html", {
             "email": email,
             "login_link": login_link,
-            "expiry_minutes": TOKEN_EXPIRY_MINUTES
+            "expiry_minutes": TOKEN_EXPIRY_MINUTES,
+            "debug": settings.DEBUG
         })
 
 
