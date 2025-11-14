@@ -146,12 +146,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Email Configuration
 # En desarrollo: logs a console. En producción: configurar SMTP real
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Cambiar según tu proveedor
-EMAIL_PORT = 587
+
+# Proveedor de email: 'gmail' o 'office365'
+EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'gmail').lower()
+
+if EMAIL_PROVIDER == 'office365':
+    EMAIL_HOST = 'smtp.office365.com'
+    EMAIL_PORT = 587
+else:  # Por defecto: Gmail
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@example.com')  # Configurar variable de entorno
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  # Configurar variable de entorno
-DEFAULT_FROM_EMAIL = 'noreply@laanonima.com.ar'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@laanonima.com.ar')
 
 # Autenticación
 LOGIN_URL = 'authentication:login_request'
