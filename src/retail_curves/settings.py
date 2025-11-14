@@ -26,10 +26,31 @@ NPM_BIN_PATH = r'C:\Program Files\nodejs\npm.cmd'
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&c2#bkyua89#o4#yr=20od231+z*t5am(-+00kh8rlne3%@&5e'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-&c2#bkyua89#o4#yr=20od231+z*t5am(-+00kh8rlne3%@&5e')
+
+# Cargar variables desde un archivo .env (si existe) para facilitar desarrollo local
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    try:
+        with open(env_path, encoding='utf-8') as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' not in line:
+                    continue
+                key, val = line.split('=', 1)
+                key = key.strip()
+                val = val.strip().strip('"').strip("'")
+                # No sobrescribir variables ya definidas en el entorno
+                if key not in os.environ:
+                    os.environ[key] = val
+    except Exception:
+        # No fallar si el .env está mal formateado
+        pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = []
 
