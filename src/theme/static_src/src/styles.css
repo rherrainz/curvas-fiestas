@@ -1,8 +1,19 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-@layer theme {
-  [data-theme="la-navidad"] {
+/* theme variables moved to utilities layer so they override base defaults */
+
+/**
+  * A catch-all path to Django template files, JavaScript, and Python files
+  * that contain Tailwind CSS classes and will be scanned by Tailwind to generate the final CSS file.
+  *
+  * If your final CSS file is not being updated after code changes, you may want to broaden or narrow
+  * the scope of this path.
+  */
+@source "../../../**/*.{html,py,js}";
+
+@layer utilities {
+  html[data-theme="la-navidad"] {
     color-scheme: light;
     --color-primary: #B33643;
     --color-primary-focus: #8D2A35;
@@ -24,12 +35,3 @@
     --color-error: #B33643;
   }
 }
-
-/**
-  * A catch-all path to Django template files, JavaScript, and Python files
-  * that contain Tailwind CSS classes and will be scanned by Tailwind to generate the final CSS file.
-  *
-  * If your final CSS file is not being updated after code changes, you may want to broaden or narrow
-  * the scope of this path.
-  */
-@source "../../../**/*.{html,py,js}";
