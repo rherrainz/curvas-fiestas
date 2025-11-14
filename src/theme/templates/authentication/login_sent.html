@@ -3,7 +3,7 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 p-4">
   <div class="w-full max-w-lg">
-    <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+    <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 mx-auto text-center">
       <!-- Success Icon - Limited to 150px max width -->
       <div class="flex justify-center">
         <div class="rounded-full bg-success/20 p-4 sm:p-6 w-fit">
@@ -39,7 +39,7 @@
         </div>
       {% else %}
         <!-- Production Mode -->
-        <div class="bg-info/10 border border-info/20 rounded-xl p-4 sm:p-6 space-y-3">
+        <div class="bg-info/10 border border-info/20 rounded-xl p-4 sm:p-6 space-y-3 text-left">
           <p class="font-semibold text-info text-sm sm:text-base">Próximos pasos:</p>
           <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm opacity-80">
             <li>Revisa tu correo (puede estar en spam)</li>
@@ -59,7 +59,7 @@
 
       <!-- Alternative: Direct Link (if in debug mode) -->
       {% if debug and login_link %}
-        <div class="bg-base-200 rounded-xl p-4 sm:p-6 space-y-3">
+        <div class="bg-base-200 rounded-xl p-4 sm:p-6 space-y-3 text-left">
           <p class="font-semibold text-sm">O haz clic directamente:</p>
           <div class="break-all bg-base-300 p-3 rounded text-xs font-mono overflow-x-auto">
             {{ login_link }}
