@@ -27,7 +27,7 @@
           <form method="post" class="space-y-4 sm:space-y-5 text-left">
             {% csrf_token %}
             
-            <div class="form-control">
+            <div class="form-control max-w-md">
               <label class="label p-0 mb-2">
                 <span class="label-text font-semibold text-sm sm:text-base">Correo Electrónico</span>
               </label>
@@ -36,7 +36,7 @@
                 name="email" 
                 placeholder="tu.email@laanonima.com.ar"
                 class="input input-bordered input-sm sm:input-md w-full"
-                style="background-color: #f3f4f6; border-color: #d1d5db; max-width: 100%;"
+                style="background-color: #f3f4f6; border: 2px solid #9ca3af; border-radius: 6px; max-width: 100%;"
                 required
                 autocomplete="email"
               />
