@@ -3,9 +3,10 @@
 {% block content %}
 <div class="max-w-6xl mx-auto p-6 space-y-6">
   <div class="flex items-center justify-center w-full">
-    <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-      <!-- Left Panel: Form -->
-      <div class="w-full">
+    <!-- Form and Info Grid -->
+    <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
+      <!-- Left Panel: Form (takes 1 column) -->
+      <div class="lg:col-span-1 w-full">
         <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 mx-auto text-center">
           <!-- Header -->
           <div class="text-center lg:text-left space-y-2">
@@ -55,34 +56,31 @@
       </div>
 
       <!-- Right Panel: Info (Hidden on mobile, visible on desktop) -->
-      <div class="hidden lg:flex flex-col space-y-6">
-        <!-- Info Grid -->
-        <div class="grid grid-cols-2 gap-6">
-          <!-- Info Box -->
-          <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 text-left">
-            <p class="font-semibold text-info text-lg">¿Cómo funciona?</p>
-            <ol class="list-decimal list-inside space-y-2 opacity-80 text-base">
-              <li>Ingresa tu email corporativo</li>
-              <li>Recibirás un enlace seguro</li>
-              <li>Haz clic en el enlace para acceder</li>
-              <li>El enlace expira en 30 minutos</li>
-            </ol>
-          </div>
-
-          <!-- Security Info -->
-          <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4 text-left">
-            <p class="font-semibold text-success text-lg">🔒 Seguridad</p>
-            <ul class="space-y-2 opacity-80 text-base">
-              <li>✓ Sin contraseñas</li>
-              <li>✓ Tokens únicos y seguros</li>
-              <li>✓ Acceso de un solo uso</li>
-              <li>✓ Solo empleados autorizados</li>
-            </ul>
-          </div>
+      <div class="hidden lg:grid lg:col-span-2 grid-cols-2 gap-6">
+        <!-- Info Box -->
+        <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 text-left">
+          <p class="font-semibold text-info text-lg">¿Cómo funciona?</p>
+          <ol class="list-decimal list-inside space-y-2 opacity-80 text-base">
+            <li>Ingresa tu email corporativo</li>
+            <li>Recibirás un enlace seguro</li>
+            <li>Haz clic en el enlace para acceder</li>
+            <li>El enlace expira en 30 minutos</li>
+          </ol>
         </div>
 
-        <!-- Footer Info -->
-        <div class="text-sm opacity-50">
+        <!-- Security Info -->
+        <div class="bg-success/10 border border-success/20 rounded-xl p-6 space-y-4 text-left">
+          <p class="font-semibold text-success text-lg">🔒 Seguridad</p>
+          <ul class="space-y-2 opacity-80 text-base">
+            <li>✓ Sin contraseñas</li>
+            <li>✓ Tokens únicos y seguros</li>
+            <li>✓ Acceso de un solo uso</li>
+            <li>✓ Solo empleados autorizados</li>
+          </ul>
+        </div>
+
+        <!-- Footer Info (spans both columns) -->
+        <div class="text-sm opacity-50 col-span-2">
           <p>Este sistema solo permite acceso</p>
           <p>a empleados de {{ allowed_domain }}</p>
         </div>
