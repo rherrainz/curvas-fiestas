@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import date
 import pandas as pd
+from openpyxl import load_workbook
 from django.db import transaction
 from core.models import Store, Family
 from sales.models import SalesRecord
@@ -75,13 +76,12 @@ def zfill_code(raw, pad):
         pass
     return s.zfill(pad) if (pad and s.isdigit()) else s
 
-@transaction.atomic
-def process_navidad_file(path: Path, *, sheet: str | None, pad: int = 0, strict_area: bool = False):
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(p)
-
-    # --- helpers de normalización/encabezados ---
+def _detect_header_row(df_no_header, max_scan=30):
+    """
+    Recorre las primeras 'max_scan' filas buscando la fila que contenga
+    la mayor cantidad de columnas requeridas (usando aliases).
+    Devuelve (row_idx, columns_canonicas) o (None, None) si no encuentra.
+    """
     def norm(s):
         s = "" if s is None else str(s)
         return " ".join(s.replace("\n", " ").strip().lower().split())
@@ -90,169 +90,183 @@ def process_navidad_file(path: Path, *, sheet: str | None, pad: int = 0, strict_
         "Dia", "Region", "Zona", "Sucursal",
         "SubFamilia", "Unidades Stock Final", "Unidades Vendidas"
     ]
-    # alias -> nombre canónico
     ALIASES = {
-        "día": "Dia",
-        "dia": "Dia",
-        "fecha": "Dia",
-
-        "region": "Region",
-        "región": "Region",
-
+        "día": "Dia", "dia": "Dia", "fecha": "Dia",
+        "region": "Region", "región": "Region",
         "zona": "Zona",
-
-        "sucursal": "Sucursal",
-        "tienda": "Sucursal",
-        "store": "Sucursal",
-
-        "subfamilia": "SubFamilia",
-        "sub familia": "SubFamilia",
-        "origen": "SubFamilia",  # por si viene así
-
-        "unidades stock final": "Unidades Stock Final",
-        "stock final unidades": "Unidades Stock Final",
-        "stock final": "Unidades Stock Final",
-        "stock (unidades)": "Unidades Stock Final",
-
-        "unidades vendidas": "Unidades Vendidas",
-        "ventas unidades": "Unidades Vendidas",
-        "ventas": "Unidades Vendidas",
+        "sucursal": "Sucursal", "tienda": "Sucursal", "store": "Sucursal",
+        "subfamilia": "SubFamilia", "sub familia": "SubFamilia", "origen": "SubFamilia",
+        "unidades stock final": "Unidades Stock Final", "stock final unidades": "Unidades Stock Final",
+        "stock final": "Unidades Stock Final", "stock (unidades)": "Unidades Stock Final",
+        "unidades vendidas": "Unidades Vendidas", "ventas unidades": "Unidades Vendidas", "ventas": "Unidades Vendidas",
     }
     REQUIRED_NORM = [norm(x) for x in REQUIRED]
     ALIASES_NORM = {k: v for k, v in ALIASES.items()}
 
-    def detect_header_row(df_no_header, max_scan=30):
-        """
-        Recorre las primeras 'max_scan' filas buscando la fila que contenga
-        la mayor cantidad de columnas requeridas (usando aliases).
-        Devuelve (row_idx, columns_canonicas) o (None, None) si no encuentra.
-        """
-        best = (-1, -1, None)  # (matches, row_idx, cols_map)
-        nrows = min(len(df_no_header), max_scan)
+    best = (-1, -1, None)  # (matches, row_idx, cols_map)
+    nrows = min(len(df_no_header), max_scan)
 
-        for i in range(nrows):
-            row = list(df_no_header.iloc[i].values)
-            cols_map = []
-            matches = 0
-            for val in row:
-                key = norm(val)
-                canon = None
-                if key in ALIASES_NORM:
-                    canon = ALIASES_NORM[key]
-                elif key in REQUIRED_NORM:
-                    # Si coincide exactamente con requerido normalizado
-                    # mapeamos al nombre exacto (posición en REQUIRED_NORM)
-                    canon = REQUIRED[REQUIRED_NORM.index(key)]
-                cols_map.append(canon)
-                if canon in REQUIRED:
-                    matches += 1
-            if matches > best[0]:
-                best = (matches, i, cols_map)
+    for i in range(nrows):
+        row = list(df_no_header.iloc[i].values)
+        cols_map = []
+        matches = 0
+        for val in row:
+            key = norm(val)
+            canon = None
+            if key in ALIASES_NORM:
+                canon = ALIASES_NORM[key]
+            elif key in REQUIRED_NORM:
+                canon = REQUIRED[REQUIRED_NORM.index(key)]
+            cols_map.append(canon)
+            if canon in REQUIRED:
+                matches += 1
+        if matches > best[0]:
+            best = (matches, i, cols_map)
+        if matches == len(REQUIRED):
+            break
 
-            # si encontramos todos, cortamos
-            if matches == len(REQUIRED):
-                break
+    if best[0] >= 5:
+        return best[1], best[2]
+    return None, None
 
-        if best[0] >= 5:  # umbral razonable (al menos 5 de 7)
-            return best[1], best[2]
-        return None, None
 
-    # === LECTURA ROBUSTA ===
-    if p.suffix.lower() in (".xlsx", ".xls", ".xlsm"):
-        target = (sheet if sheet not in (None, "") else 0)
-        x = pd.read_excel(p, sheet_name=target, header=None)
-        if isinstance(x, dict):
-            # si se pidió por nombre y existe
-            if isinstance(target, str) and target in x:
-                raw = x[target]
-            else:
-                raw = next(iter(x.values()))
-        else:
-            raw = x
-
-        # detectar fila de encabezados
-        hdr_idx, cols_map = detect_header_row(raw)
-        if hdr_idx is None:
-            raise ValueError("No pude detectar la fila de encabezados. Verificá el archivo/hoja.")
-
-        # construir nombres canónicos (donde no haya match, dejamos el valor original)
-        canon_cols = []
-        header_row_values = list(raw.iloc[hdr_idx].values)
-        for j, v in enumerate(header_row_values):
-            canon = cols_map[j]
-            if canon is None:
-                canon = str(v).strip() if v is not None else f"col_{j}"
-            canon_cols.append(canon)
-
-        # datos desde la fila siguiente al encabezado
-        df = raw.iloc[hdr_idx + 1:].copy()
-        df.columns = canon_cols
-        df = df.reset_index(drop=True)
-
-        # eliminar columnas completamente vacías
-        df = df.dropna(axis=1, how="all")
+def _read_excel_header(path: Path, sheet: str | None) -> tuple[list[str], int]:
+    """
+    Lee solo la cabecera del Excel (primeras ~30 filas) y retorna:
+    (nombres_canonicos, fila_datos_inicio)
+    """
+    p = Path(path)
+    target = (sheet if sheet not in (None, "") else 0)
+    
+    # Leer solo las primeras filas para detectar encabezado
+    x = pd.read_excel(p, sheet_name=target, header=None, nrows=100)
+    if isinstance(x, dict):
+        raw = x[target] if isinstance(target, str) and target in x else next(iter(x.values()))
     else:
-        # CSV/TSV: intentamos con encabezado en la primera línea
-        # si falla, el usuario debería limpiar el archivo o pasar XLSX
-        df = pd.read_csv(p, sep=None, engine="python")
-    # === FIN LECTURA ===
-    summary_meta = {
-            "detected_columns": list(df.columns),
-            "rows_raw": int(df.shape[0]),
-        }
-    # Validar que estén las requeridas (después de normalizar)
-    miss = [c for c in REQUIRED if c not in df.columns]
+        raw = x
+
+    hdr_idx, cols_map = _detect_header_row(raw, max_scan=30)
+    if hdr_idx is None:
+        raise ValueError("No pude detectar la fila de encabezados. Verificá el archivo/hoja.")
+
+    canon_cols = []
+    header_row_values = list(raw.iloc[hdr_idx].values)
+    for j, v in enumerate(header_row_values):
+        canon = cols_map[j]
+        if canon is None:
+            canon = str(v).strip() if v is not None else f"col_{j}"
+        canon_cols.append(canon)
+
+    # Validar que estén las requeridas
+    REQUIRED = ["Dia", "Region", "Zona", "Sucursal", "SubFamilia", "Unidades Stock Final", "Unidades Vendidas"]
+    miss = [c for c in REQUIRED if c not in canon_cols]
     if miss:
         raise ValueError(f"Faltan columnas requeridas: {', '.join(miss)}")
+
+    return canon_cols, hdr_idx + 1  # hdr_idx+1 es donde empiezan los datos
+
+
+def process_navidad_file(path: Path, *, sheet: str | None, pad: int = 0, strict_area: bool = False, chunk_size: int = 10000):
+    """
+    Lee un Excel en chunks para minimizar uso de RAM usando openpyxl.
+    Usa update_or_create para evitar duplicados (sobreescribe si existe).
+    
+    Args:
+        path: Ruta al archivo Excel
+        sheet: Nombre o índice de la hoja
+        pad: Padding para códigos de sucursal
+        strict_area: Validación región/zona
+        chunk_size: Cantidad de filas a procesar por iteración (default 10000)
+    """
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(p)
+
+    # Detectar encabezados leyendo solo primeras filas con pandas
+    canon_cols, data_start_row = _read_excel_header(p, sheet)
 
     summary = {
         "stock_created": 0, "stock_updated": 0, "stock_skipped": 0,
         "sales_created": 0, "sales_updated": 0, "sales_skipped": 0,
         "rows": 0,
+        "detected_columns": canon_cols,
+        "rows_raw": 0,
     }
 
-    for _, r in df.iterrows():
+    # Cache de Store y Family para evitar queries repetidas
+    store_cache = {}
+    family_cache = {}
+
+    # Usar openpyxl para leer en chunks sin cargar todo a memoria
+    target_sheet = (sheet if sheet not in (None, "") else None)
+    wb = load_workbook(p, read_only=True, data_only=True)
+    
+    if target_sheet is None:
+        ws = wb.active
+    elif isinstance(target_sheet, int):
+        ws = wb.worksheets[target_sheet]
+    else:
+        ws = wb[target_sheet]
+
+    # Mapear columnas por posición
+    col_indices = {col_name: idx for idx, col_name in enumerate(canon_cols)}
+
+    row_count = 0
+    for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row + 1, values_only=True), start=data_start_row + 1):
+        row_count += 1
         summary["rows"] += 1
-        dt = parse_date(r["Dia"])
+        summary["rows_raw"] += 1
+
+        # Construir diccionario de fila con nombres canonicos
+        row_dict = {col_name: row[col_idx] if col_idx < len(row) else None for col_name, col_idx in col_indices.items()}
+
+        dt = parse_date(row_dict["Dia"])
         if not dt:
             continue
 
-        code = zfill_code(r["Sucursal"], pad)
-        subfam_excel = str(r["SubFamilia"]).strip()
+        code = zfill_code(row_dict["Sucursal"], pad)
+        subfam_excel = str(row_dict["SubFamilia"] or "").strip()
         if not subfam_excel:
             continue
 
-        # Store
-        try:
-            store = Store.objects.get(code=code)
-        except Store.DoesNotExist:
+        # Store (con cache)
+        if code not in store_cache:
+            try:
+                store_cache[code] = Store.objects.get(code=code)
+            except Store.DoesNotExist:
+                store_cache[code] = None
+
+        store = store_cache[code]
+        if store is None:
             summary["stock_skipped"] += 1
             summary["sales_skipped"] += 1
             continue
 
         # Validación opcional región/zona
         if strict_area:
-            region_excel = str(r.get("Region", "") or "").strip()
-            zona_excel   = str(r.get("Zona", "") or "").strip()
+            region_excel = str(row_dict.get("Region", "") or "").strip()
+            zona_excel = str(row_dict.get("Zona", "") or "").strip()
             if (store.region.name.strip() != region_excel) or (store.zone.name.strip() != zona_excel):
                 summary["stock_skipped"] += 1
                 summary["sales_skipped"] += 1
                 continue
 
-        # Family por ORIGEN == "SubFamilia"
-        try:
-            family = Family.objects.get(origen=subfam_excel, is_active=True)
-        except Family.DoesNotExist:
-            summary["stock_skipped"] += 1
-            summary["sales_skipped"] += 1
-            continue
-        except Family.MultipleObjectsReturned:
+        # Family por ORIGEN (con cache)
+        cache_key = (subfam_excel, "is_active")
+        if cache_key not in family_cache:
+            try:
+                family_cache[cache_key] = Family.objects.get(origen=subfam_excel, is_active=True)
+            except (Family.DoesNotExist, Family.MultipleObjectsReturned):
+                family_cache[cache_key] = None
+
+        family = family_cache[cache_key]
+        if family is None:
             summary["stock_skipped"] += 1
             summary["sales_skipped"] += 1
             continue
 
-        # STOCK
-        stock_units = parse_number(r.get("Unidades Stock Final"))
+        # STOCK: usar update_or_create para evitar duplicados
+        stock_units = parse_number(row_dict.get("Unidades Stock Final"))
         if stock_units is not None:
             _, is_new = StockRecord.objects.update_or_create(
                 store=store, family=family, date=dt,
@@ -263,8 +277,8 @@ def process_navidad_file(path: Path, *, sheet: str | None, pad: int = 0, strict_
         else:
             summary["stock_skipped"] += 1
 
-        # SALES (omitimos CDR o ventas == 0)
-        units_sold = parse_number(r.get("Unidades Vendidas"))
+        # SALES: usar update_or_create para evitar duplicados
+        units_sold = parse_number(row_dict.get("Unidades Vendidas"))
         if units_sold is not None and units_sold > 0 and not store.is_distribution_center:
             _, is_new = SalesRecord.objects.update_or_create(
                 store=store, family=family, date=dt,
@@ -274,7 +288,7 @@ def process_navidad_file(path: Path, *, sheet: str | None, pad: int = 0, strict_
             summary["sales_updated"] += int(not is_new)
         else:
             summary["sales_skipped"] += 1
-            
-        summary.update(summary_meta)
+
+    wb.close()
     return summary
 
