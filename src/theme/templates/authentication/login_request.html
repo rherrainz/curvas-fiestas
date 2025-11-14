@@ -2,11 +2,10 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto p-6 space-y-6">
-  <div class="flex items-center justify-center w-full">
-    <!-- Form and Info Grid -->
-    <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
-      <!-- Left Panel: Form (takes 1 column) -->
-      <div class="lg:col-span-1 w-full">
+  <div class="w-full space-y-6">
+    <!-- Form Section (Full width) -->
+    <div class="flex items-center justify-center w-full">
+      <div class="w-full">
         <div class="bg-base-100 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 mx-auto text-center">
           <!-- Header -->
           <div class="text-center lg:text-left space-y-2">
@@ -54,9 +53,10 @@
           </form>
         </div>
       </div>
+    </div>
 
-      <!-- Right Panel: Info (Hidden on mobile, visible on desktop) -->
-      <div class="hidden lg:grid lg:col-span-2 grid-cols-2 gap-6">
+    <!-- Info Boxes Section (Full width, 2 columns on desktop) -->
+    <div class="hidden lg:grid lg:grid-cols-2 gap-6 w-full">
         <!-- Info Box -->
         <div class="bg-info/10 border border-info/20 rounded-xl p-6 space-y-4 text-left">
           <p class="font-semibold text-info text-lg">¿Cómo funciona?</p>
@@ -86,19 +86,4 @@
         </div>
       </div>
     </div>
-
-    <!-- Mobile Info (visible on small screens) -->
-    <div class="lg:hidden mt-8 space-y-4">
-      <div class="bg-info/10 border border-info/20 rounded-xl p-4 space-y-3">
-        <p class="font-semibold text-info">¿Cómo funciona?</p>
-        <ol class="list-decimal list-inside space-y-2 opacity-80 text-sm">
-          <li>Ingresa tu email corporativo</li>
-          <li>Recibirás un enlace seguro</li>
-          <li>Haz clic en el enlace para acceder</li>
-          <li>El enlace expira en 30 minutos</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
