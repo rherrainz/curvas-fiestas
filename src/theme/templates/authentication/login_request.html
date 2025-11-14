@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-base-100 rounded-2xl shadow-2xl p-8 space-y-6">
+      <!-- Header -->
+      <div class="text-center space-y-2">
+        <h1 class="text-3xl font-bold">Acceso Corporativo</h1>
+        <p class="text-sm opacity-70">Ingresa con tu email {{ allowed_domain }}</p>
+      </div>
+
+      <!-- Error Message -->
+      {% if error %}
+        <div class="alert alert-error">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2" />
+          </svg>
+          <span>{{ error }}</span>
+        </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Correo Electrónico</span>
+          </label>
+          <input 
+            type="email" 
+            name="email" 
+            placeholder="tu.email@laanonima.com.ar"
+            class="input input-bordered input-lg focus:input-primary"
+            required
+            autocomplete="email"
+          />
+          <label class="label">
+            <span class="label-text-alt text-xs opacity-60">Solo se permiten emails corporativos</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full">
+          Solicitar Acceso
+        </button>
+      </form>
+
+      <!-- Info Box -->
+      <div class="bg-info/10 border border-info/20 rounded-lg p-4 text-sm space-y-2">
+        <p class="font-semibold text-info">¿Cómo funciona?</p>
+        <ol class="list-decimal list-inside space-y-1 opacity-80 text-xs">
+          <li>Ingresa tu email corporativo</li>
+          <li>Recibirás un enlace seguro</li>
+          <li>Haz clic en el enlace para acceder</li>
+          <li>El enlace expira en 30 minutos</li>
+        </ol>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center text-xs opacity-50">
+        <p>Este sistema solo permite acceso a empleados de {{ allowed_domain }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-base-100 rounded-2xl shadow-2xl p-8 space-y-6">
+      <!-- Success Icon -->
+      <div class="flex justify-center">
+        <div class="rounded-full bg-success/20 p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="text-center space-y-2">
+        <h1 class="text-3xl font-bold">¡Correo Enviado!</h1>
+        <p class="text-sm opacity-70">Revisa tu bandeja de entrada</p>
+      </div>
+
+      <!-- Email Info -->
+      <div class="bg-base-200 rounded-lg p-4 text-center">
+        <p class="text-sm opacity-60 mb-1">Se envió un enlace de acceso a:</p>
+        <p class="font-bold text-lg break-all">{{ email }}</p>
+      </div>
+
+      <!-- Instructions -->
+      <div class="bg-warning/10 border border-warning/20 rounded-lg p-4 space-y-3">
+        <p class="font-semibold text-warning">Próximos pasos:</p>
+        <ol class="list-decimal list-inside space-y-2 text-sm opacity-80">
+          <li>Revisa tu correo (puede estar en spam)</li>
+          <li>Haz clic en el enlace de acceso</li>
+          <li>Serás redirigido automáticamente</li>
+        </ol>
+      </div>
+
+      <!-- Expiry Info -->
+      <div class="alert alert-info text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>El enlace expira en <strong>{{ expiry_minutes }} minutos</strong></span>
+      </div>
+
+      <!-- Resend Option -->
+      <a href="{% url 'authentication:login_request' %}" class="btn btn-outline btn-sm w-full">
+        ¿No recibiste el email? Intenta de nuevo
+      </a>
+
+      <!-- Support -->
+      <div class="text-center text-xs opacity-50 space-y-1">
+        <p>¿Problemas? Contacta a soporte</p>
+        <p>para obtener ayuda con tu cuenta</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
