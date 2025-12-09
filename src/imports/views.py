@@ -14,8 +14,9 @@ def navidad_upload_view(request):
         form = NavidadUploadForm(request.POST, request.FILES)
         if form.is_valid():
             up_file = form.cleaned_data["file"]
-            sheet = form.cleaned_data.get("sheet") or "" 
-            pad = form.cleaned_data.get("pad") or 0
+            sheet = form.cleaned_data.get("sheet") or ""
+            # Usar 0 por defecto si no viene `pad`. Si el usuario envía 0, se respeta.
+            pad = form.cleaned_data.get("pad", 0)
             strict_area = form.cleaned_data.get("strict_area") or False
 
             # guardar temporal
