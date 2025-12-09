@@ -11,8 +11,10 @@ class SalesRecord(models.Model):
     class Meta:
         unique_together = (("store", "family", "date"),)
         indexes = [
+            models.Index(fields=["store", "family", "date"]),  # composite key lookup en flush_chunk
             models.Index(fields=["store", "date"]),
             models.Index(fields=["family", "date"]),
+            models.Index(fields=["date"]),  # análisis por fecha
         ]
         ordering = ["store__code", "family__familia_std", "family__subfamilia_std", "date"]
 

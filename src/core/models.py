@@ -49,6 +49,10 @@ class Family(models.Model):
 
     class Meta:
         unique_together = (("origen", "sector", "familia_std", "subfamilia_std"),)
+        indexes = [
+            models.Index(fields=["origen", "is_active"]),  # lookup rápido en flush_chunk
+            models.Index(fields=["is_active"]),  # filter activas
+        ]
         ordering = ["origen", "sector", "familia_std", "subfamilia_std"]
 
     def __str__(self):

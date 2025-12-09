@@ -56,7 +56,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-/* URLs de backend generadas por Django (evita hardcodear rutas) */
 const ZONES_URL  = "{% url 'core:zones_by_region' %}";
 const STORES_URL = "{% url 'core:stores_by_zone' %}";
 
@@ -80,153 +79,81 @@ async function loadZones(regionId) {
   resetSelect($store, 'Todas');
   $zone.disabled = true;
   $store.disabled = true;
-
   if (!regionId) { $zone.disabled = false; $store.disabled = false; return; }
-
   try {
     const r = await fetch(`${ZONES_URL}?region_id=${encodeURIComponent(regionId)}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    for (const z of (data.items || [])) {
-      const opt = document.createElement('option');
-      opt.value = z.id; opt.textContent = z.name;
-      $zone.appendChild(opt);
-    }
-  } catch (e) {
-    console.error("Error cargando zonas:", e);
-  } finally {
-    $zone.disabled = false; // habilitamos aunque venga vacío -> “Todas”
-  }
+    for (const z of (data.items || [])) { const opt = document.createElement('option'); opt.value = z.id; opt.textContent = z.name; $zone.appendChild(opt); }
+  } catch (e) { console.error("Error cargando zonas:", e); } finally { $zone.disabled = false; }
 }
 
 async function loadStores(zoneId) {
-  resetSelect($store, 'Todas');
-  $store.disabled = true;
-
-  if (!zoneId) { $store.disabled = false; return; }
-
+  resetSelect($store, 'Todas'); $store.disabled = true; if (!zoneId) { $store.disabled = false; return; }
   try {
     const r = await fetch(`${STORES_URL}?zone_id=${encodeURIComponent(zoneId)}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    for (const s of (data.items || [])) {
-      const opt = document.createElement('option');
-      opt.value = s.id; opt.textContent = s.label;
-      $store.appendChild(opt);
-    }
-  } catch (e) {
-    console.error("Error cargando sucursales:", e);
-  } finally {
-    $store.disabled = false;
-  }
+    for (const s of (data.items || [])) { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.label; $store.appendChild(opt); }
+  } catch (e) { console.error("Error cargando sucursales:", e); } finally { $store.disabled = false; }
 }
 
-$region.addEventListener('change', e => {
-  loadZones(e.target.value);
-});
+$region.addEventListener('change', e => loadZones(e.target.value));
+$zone.addEventListener('change', e => loadStores(e.target.value));
 
-$zone.addEventListener('change', e => {
-  loadStores(e.target.value);
-});
-
-// Si se elige sucursal manualmente, el backend igual fuerza coherencia.
-// Si quisieras, acá podrías bloquear región/zona para evitar confusiones.
-$store.addEventListener('change', e => { /* opcional */ });
+function getThemeColors() {
+  const s = getComputedStyle(document.documentElement);
+  const keys = ['--color-primary','--color-secondary','--color-accent','--color-neutral','--color-info','--color-success','--color-warning','--color-error'];
+  return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
+}
+function hexToRgba(hex, a) {
+  if (!hex) return null; const h = hex.replace('#',''); const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h; const bigint = parseInt(full,16); const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255; return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+function parseYear(label) {
+  const m = /(\d{4})/.exec(label || "");
+  return m ? Number(m[1]) : null;
+}
 
 function fetchData() {
   const params = new URLSearchParams(new FormData($form));
-  fetch(`/sales/curves/data/?${params.toString()}`)
-    .then(r => r.json())
-    .then(d => {
-      // Mantener solo datasets con suma numérica > 0
-      const filtered = (d.datasets || []).filter(ds => {
-        const total = (ds.data || []).reduce((acc, v) => acc + (Number(v) || 0), 0);
-        return total > 0;
-      });
+  fetch(`/sales/curves/data/?${params.toString()}`).then(r => r.json()).then(d => {
+    const filtered = (d.datasets || []).filter(ds => (ds.data||[]).reduce((acc,v)=>acc + (Number(v)||0), 0) > 0);
+    if (filtered.length === 0) { if (chart) chart.destroy(); ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); document.getElementById('metaInfo').textContent = "Sin datos para el filtro seleccionado."; return; }
 
-      if (filtered.length === 0) {
-        if (chart) chart.destroy();
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        document.getElementById('metaInfo').textContent =
-          "Sin datos para el filtro seleccionado.";
-        return;
-      }
+    const labels = d.labels || [];
+    const palette = getThemeColors();
 
-      const labels = d.labels;
-      // Obtener paleta desde variables CSS del tema
-      function getThemeColors() {
-        const s = getComputedStyle(document.documentElement);
-        const keys = [
-          '--color-primary', '--color-secondary', '--color-accent', '--color-neutral',
-          '--color-info', '--color-success', '--color-warning', '--color-error'
-        ];
-        return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
-      }
-      function hexToRgba(hex, a) {
-        if (!hex) return null;
-        const h = hex.replace('#','');
-        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-        const bigint = parseInt(full, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-      }
-
-      const palette = getThemeColors();
-      const ds = filtered.map((it, idx) => {
-        const color = palette[idx % palette.length] || '#333333';
-        return {
-          label: it.label,
-          data: it.data.map(x => Number(x) || 0),
-          tension: 0.3,
-          borderWidth: 2,
-          borderColor: color,
-          backgroundColor: hexToRgba(color, 0.12),
-          pointBackgroundColor: color,
-          fill: false,
-        };
-      });
-
-      const config = {
-        type: 'line',
-        data: { labels, datasets: ds },
-        options: {
-          responsive: true,
-          interaction: { mode: 'index', intersect: false },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-          plugins: { legend: { position: 'top' } }
-        }
-      };
-      if (chart) chart.destroy();
-      chart = new Chart(ctx, config);
-
-      const note = d.meta?.note || '';
-      const years = d.meta?.years_compared?.join(', ');
-      document.getElementById('metaInfo').textContent =
-        `Años comparados: ${years || '-'}${note ? ' · ' + note : ''}`;
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById('metaInfo').textContent = "Error al cargar los datos.";
+    const processed = filtered.map(it => {
+      const nums = (it.data||[]).map(x => { const n = Number(x); return isNaN(n) ? null : n; });
+      const hasAny = nums.some(v => v !== null && v !== undefined);
+      if (!hasAny) return { label: it.label, raw: nums.map(()=>null) };
+      let last = nums.length - 1; while (last >= 0 && (nums[last] === null || nums[last] === undefined)) last--;
+      if (last < 0) return { label: it.label, raw: nums.map(()=>null) };
+      const tailVal = nums[last]; let p = last; while (p >= 0 && nums[p] === tailVal) p--; const runStart = p + 1;
+      const trimmed = nums.map((v, idx) => idx >= runStart ? null : v);
+      return { label: it.label, raw: trimmed };
     });
+
+    const validIndices = labels.map((lab,i)=>i).filter(i => processed.some(p => p.raw[i] !== null && p.raw[i] !== undefined));
+    const filteredLabels = validIndices.map(i => labels[i]);
+
+    const ds = processed.map((p, idx) => {
+      const color = palette[idx % palette.length] || '#333333';
+      const finalData = validIndices.map(i => p.raw[i] !== undefined ? p.raw[i] : null);
+      const year = parseYear(p.label);
+      // Chart.js dibuja en orden; con "order" garantizamos que los años nuevos queden arriba
+      return { label: p.label, data: finalData, tension:0.3, borderWidth:2, borderColor:color, backgroundColor:hexToRgba(color,0.12), pointBackgroundColor:color, spanGaps:false, fill:false, order: year ?? idx };
+    });
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, { type:'line', data:{ labels: filteredLabels, datasets: ds }, options: { responsive:true, interaction:{mode:'index', intersect:false}, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 }}}, plugins:{ legend:{ position:'top', align:'start' }, } } });
+
+    const note = d.meta?.note || ''; const years = d.meta?.years_compared?.join(', ');
+    document.getElementById('metaInfo').textContent = `Años comparados: ${years || '-'}${note ? ' · ' + note : ''}`;
+  }).catch(err => { console.error(err); document.getElementById('metaInfo').textContent = "Error al cargar los datos."; });
 }
 
-
-$form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  fetchData();
-});
-
-// Primera carga + si ya hay región preseleccionada, inicializar cascada
-document.addEventListener('DOMContentLoaded', async () => {
-  if ($region.value) {
-    await loadZones($region.value);
-    if ($zone.value) {
-      await loadStores($zone.value);
-    }
-  }
-  fetchData();
-});
+$form.addEventListener('submit', e => { e.preventDefault(); fetchData(); });
+document.addEventListener('DOMContentLoaded', async () => { if ($region.value) { await loadZones($region.value); if ($zone.value) await loadStores($zone.value); } fetchData(); });
 </script>
 {% endblock %}
