@@ -4,9 +4,9 @@
 {% block content %}
 <div class="max-w-6xl mx-auto p-6 space-y-6">
   <div>
-    <h1 class="text-3xl font-bold">Curvas de Ventas (acumuladas) vs Stock</h1>
+    <h1 class="text-3xl font-bold">Curvas de Ventas Acumuladas</h1>
     <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong> por
-      <strong>Sucursal</strong> o, si no elegís sucursal, por <strong>Zona/Región</strong>.
+      <strong>Sucursal/Zona/Región/Total Compañía</strong>.
     </p>
   </div>
 
@@ -51,6 +51,17 @@
     <canvas id="curveChart" height="120"></canvas>
     <p id="metaInfo" class="text-xs opacity-60 mt-2"></p>
   </div>
+
+  <div class="bg-base-100 p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">Detalle diario</h2>
+    <div class="overflow-x-auto">
+      <table id="dataTable" class="table table-sm w-full text-sm">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="tableNote" class="text-xs opacity-60 mt-2"></p>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -64,6 +75,8 @@ const $zone   = document.getElementById('zone');
 const $store  = document.getElementById('store');
 const $form   = document.getElementById('filters');
 const ctx     = document.getElementById('curveChart').getContext('2d');
+const $table  = document.getElementById('dataTable');
+const $tableNote = document.getElementById('tableNote');
 let chart;
 
 function resetSelect($el, placeholder) {
@@ -94,7 +107,13 @@ async function loadStores(zoneId) {
     const r = await fetch(`${STORES_URL}?zone_id=${encodeURIComponent(zoneId)}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    for (const s of (data.items || [])) { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.label; $store.appendChild(opt); }
+    const items = (data.items || []).slice().sort((a, b) => {
+      const na = Number(a.id || a.code || a.label);
+      const nb = Number(b.id || b.code || b.label);
+      if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+      return String(a.label || a.id || '').localeCompare(String(b.label || b.id || ''), 'es', { numeric:true, sensitivity:'base' });
+    });
+    for (const s of items) { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.label; $store.appendChild(opt); }
   } catch (e) { console.error("Error cargando sucursales:", e); } finally { $store.disabled = false; }
 }
 
@@ -114,11 +133,75 @@ function parseYear(label) {
   return m ? Number(m[1]) : null;
 }
 
+function pad2(n) { return String(n).padStart(2, '0'); }
+function formatDayLabel(label) {
+  const m = /^(\d{1,2})-(\d{1,2})$/.exec(label || "");
+  if (m) return `${pad2(m[2])}/${pad2(m[1])}`;
+  return label || "";
+}
+function formatNumber(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+  return Number(v).toLocaleString('es-AR');
+}
+function formatPercent(delta) {
+  if (delta === null || delta === undefined || Number.isNaN(delta)) return '';
+  const sign = delta > 0 ? '+' : '';
+  return `${sign}${delta.toFixed(1)}%`;
+}
+function pctDiff(a, b) {
+  if (a === null || a === undefined || b === null || b === undefined || Number(b) === 0) return null;
+  return ((Number(a) / Number(b)) - 1) * 100;
+}
+
+function clearTable() {
+  if (!$table) return;
+  $table.querySelector('thead').innerHTML = '';
+  $table.querySelector('tbody').innerHTML = '';
+  if ($tableNote) $tableNote.textContent = '';
+}
+
+function renderTable(labels, datasets) {
+  if (!$table) return;
+  const thead = $table.querySelector('thead');
+  const tbody = $table.querySelector('tbody');
+  const yearList = Array.from(new Set(datasets.map(d => parseYear(d.label)).filter(Boolean))).sort((a,b)=>a-b);
+  const yearData = new Map();
+  datasets.forEach(d => { const y = parseYear(d.label); if (y) yearData.set(y, d.data); });
+
+  const headCols = yearList.map(y => `<th class="text-right">${y}</th>`).join('');
+  thead.innerHTML = `<tr><th>Día</th>${headCols}<th class="text-right">2025 vs 2024 (%)</th><th class="text-right">2025 vs 2023 (%)</th></tr>`;
+
+  const rows = labels.map((lab, idx) => {
+    const valueCells = yearList.map(y => {
+      const val = (yearData.get(y) || [])[idx];
+      return `<td class="text-right">${formatNumber(val)}</td>`;
+    }).join('');
+    const v2025 = (yearData.get(2025) || [])[idx];
+    const v2024 = (yearData.get(2024) || [])[idx];
+    const v2023 = (yearData.get(2023) || [])[idx];
+    const diff25_24 = formatPercent(pctDiff(v2025, v2024));
+    const diff25_23 = formatPercent(pctDiff(v2025, v2023));
+    return `<tr><th class="font-normal">${lab}</th>${valueCells}<td class="text-right">${diff25_24}</td><td class="text-right">${diff25_23}</td></tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+
+  if ($tableNote) {
+    const foundYears = yearList.length ? yearList.join(', ') : '-';
+    $tableNote.textContent = `Columnas activas: ${foundYears}. Las comparaciones solo se calculan si hay datos para 2025 y el ano base.`;
+  }
+}
+
 function fetchData() {
   const params = new URLSearchParams(new FormData($form));
   fetch(`/sales/curves/data/?${params.toString()}`).then(r => r.json()).then(d => {
     const filtered = (d.datasets || []).filter(ds => (ds.data||[]).reduce((acc,v)=>acc + (Number(v)||0), 0) > 0);
-    if (filtered.length === 0) { if (chart) chart.destroy(); ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); document.getElementById('metaInfo').textContent = "Sin datos para el filtro seleccionado."; return; }
+    if (filtered.length === 0) {
+      if (chart) chart.destroy();
+      ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      document.getElementById('metaInfo').textContent = "Sin datos para el filtro seleccionado.";
+      clearTable();
+      return;
+    }
 
     const labels = d.labels || [];
     const palette = getThemeColors();
@@ -136,18 +219,21 @@ function fetchData() {
 
     const validIndices = labels.map((lab,i)=>i).filter(i => processed.some(p => p.raw[i] !== null && p.raw[i] !== undefined));
     const filteredLabels = validIndices.map(i => labels[i]);
+    const displayLabels = filteredLabels.map(formatDayLabel);
 
     const ds = processed.map((p, idx) => {
       const color = palette[idx % palette.length] || '#333333';
       const finalData = validIndices.map(i => p.raw[i] !== undefined ? p.raw[i] : null);
       const year = parseYear(p.label);
       // Chart.js dibuja en orden; con "order" garantizamos que los años nuevos queden arriba
-      return { label: p.label, data: finalData, tension:0.3, borderWidth:2, borderColor:color, backgroundColor:hexToRgba(color,0.12), pointBackgroundColor:color, spanGaps:false, fill:false, order: year ?? idx };
+      // Invertimos el order para que los a¤os más recientes se dibujen encima (descendente)
+      return { label: p.label, data: finalData, tension:0.3, borderWidth:2, borderColor:color, backgroundColor:hexToRgba(color,0.12), pointBackgroundColor:color, spanGaps:false, fill:false, order: -(year ?? idx) };
     });
 
     if (chart) chart.destroy();
-    chart = new Chart(ctx, { type:'line', data:{ labels: filteredLabels, datasets: ds }, options: { responsive:true, interaction:{mode:'index', intersect:false}, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 }}}, plugins:{ legend:{ position:'top', align:'start' }, } } });
+    chart = new Chart(ctx, { type:'line', data:{ labels: displayLabels, datasets: ds }, options: { responsive:true, interaction:{mode:'index', intersect:false}, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 }}}, plugins:{ legend:{ position:'top', align:'start' }, } } });
 
+    renderTable(chart.data.labels, chart.data.datasets);
     const note = d.meta?.note || ''; const years = d.meta?.years_compared?.join(', ');
     document.getElementById('metaInfo').textContent = `Años comparados: ${years || '-'}${note ? ' · ' + note : ''}`;
   }).catch(err => { console.error(err); document.getElementById('metaInfo').textContent = "Error al cargar los datos."; });

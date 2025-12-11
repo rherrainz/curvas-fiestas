@@ -54,6 +54,17 @@
     <h2 class="text-xl font-semibold mb-4">Stock diario (3 años comparados)</h2>
     <canvas id="stockChart" height="120"></canvas>
   </div>
+
+  <div class="bg-base-100 p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">Detalle diario</h2>
+    <div class="overflow-x-auto">
+      <table id="dataTable" class="table table-sm w-full text-sm">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="tableNote" class="text-xs opacity-60 mt-2"></p>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -67,6 +78,8 @@ const $zone   = document.getElementById('zone');
 const $store  = document.getElementById('store');
 const $form   = document.getElementById('filters');
 const ctx     = document.getElementById('stockChart').getContext('2d');
+const $table  = document.getElementById('dataTable');
+const $tableNote = document.getElementById('tableNote');
 let chart;
 
 function resetSelect($el, placeholder) {
@@ -94,7 +107,13 @@ async function loadStores(zoneId) {
   try {
     const r = await fetch(`${STORES_URL}?zone_id=${encodeURIComponent(zoneId)}`);
     const data = await r.json();
-    for (const s of (data.items||[])) {
+    const items = (data.items || []).slice().sort((a, b) => {
+      const na = Number(a.id || a.code || a.label);
+      const nb = Number(b.id || b.code || b.label);
+      if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+      return String(a.label || a.id || '').localeCompare(String(b.label || b.id || ''), 'es', { numeric:true, sensitivity:'base' });
+    });
+    for (const s of items) {
       const o = document.createElement('option'); o.value=s.id; o.textContent=s.label; $store.appendChild(o);
     }
   } finally { $store.disabled=false; }
@@ -118,6 +137,83 @@ $store.addEventListener('change', async (e) => {
   $store.value = code;  // re-seleccionar
 });
 
+// Helpers de estilo y formato
+function getThemeColors() {
+  const s = getComputedStyle(document.documentElement);
+  const keys = ['--color-primary','--color-secondary','--color-accent','--color-neutral','--color-info','--color-success','--color-warning','--color-error'];
+  return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
+}
+function hexToRgba(hex, a) {
+  if (!hex) return null;
+  const h = hex.replace('#','');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const bigint = parseInt(full, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+function parseYear(label) {
+  const m = /(\d{4})/.exec(label || "");
+  return m ? Number(m[1]) : null;
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function formatDayLabel(label) {
+  const m = /^(\d{1,2})-(\d{1,2})$/.exec(label || "");
+  if (m) return `${pad2(m[2])}/${pad2(m[1])}`;
+  return label || "";
+}
+function formatNumber(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+  return Number(v).toLocaleString('es-AR');
+}
+function formatPercent(delta) {
+  if (delta === null || delta === undefined || Number.isNaN(delta)) return '';
+  const sign = delta > 0 ? '+' : '';
+  return `${sign}${delta.toFixed(1)}%`;
+}
+function pctDiff(a, b) {
+  if (a === null || a === undefined || b === null || b === undefined || Number(b) === 0) return null;
+  return ((Number(a) / Number(b)) - 1) * 100;
+}
+function clearTable() {
+  if (!$table) return;
+  $table.querySelector('thead').innerHTML = '';
+  $table.querySelector('tbody').innerHTML = '';
+  if ($tableNote) $tableNote.textContent = '';
+}
+function renderTable(labels, datasets) {
+  if (!$table) return;
+  const thead = $table.querySelector('thead');
+  const tbody = $table.querySelector('tbody');
+  const yearList = Array.from(new Set(datasets.map(d => parseYear(d.label)).filter(Boolean))).sort((a,b)=>a-b);
+  const yearData = new Map();
+  datasets.forEach(d => { const y = parseYear(d.label); if (y) yearData.set(y, d.data); });
+
+  const headCols = yearList.map(y => `<th class="text-right">${y}</th>`).join('');
+  thead.innerHTML = `<tr><th>Día</th>${headCols}<th class="text-right">2025 vs 2024 (%)</th><th class="text-right">2025 vs 2023 (%)</th></tr>`;
+
+  const rows = labels.map((lab, idx) => {
+    const valueCells = yearList.map(y => {
+      const val = (yearData.get(y) || [])[idx];
+      return `<td class="text-right">${formatNumber(val)}</td>`;
+    }).join('');
+    const v2025 = (yearData.get(2025) || [])[idx];
+    const v2024 = (yearData.get(2024) || [])[idx];
+    const v2023 = (yearData.get(2023) || [])[idx];
+    const diff25_24 = formatPercent(pctDiff(v2025, v2024));
+    const diff25_23 = formatPercent(pctDiff(v2025, v2023));
+    return `<tr><th class="font-normal">${lab}</th>${valueCells}<td class="text-right">${diff25_24}</td><td class="text-right">${diff25_23}</td></tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+
+  if ($tableNote) {
+    const foundYears = yearList.length ? yearList.join(', ') : '-';
+    $tableNote.textContent = `Columnas activas: ${foundYears}. Las comparaciones solo se calculan si hay datos para 2025 y el año base.`;
+  }
+}
+
+
 function fetchData() {
   const params = new URLSearchParams(new FormData($form));
   fetch(`/stock/curves/data/?${params.toString()}`)
@@ -128,32 +224,15 @@ function fetchData() {
       if (filtered.length === 0) {
         if (chart) chart.destroy();
         ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        clearTable();
         return;
       }
-      
-      // Obtener paleta desde variables CSS del tema
-      function getThemeColors() {
-        const s = getComputedStyle(document.documentElement);
-        const keys = [
-          '--color-primary', '--color-secondary', '--color-accent', '--color-neutral',
-          '--color-info', '--color-success', '--color-warning', '--color-error'
-        ];
-        return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
-      }
-      function hexToRgba(hex, a) {
-        if (!hex) return null;
-        const h = hex.replace('#','');
-        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-        const bigint = parseInt(full, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-      }
 
+      const labels = (d.labels || []).map(formatDayLabel);
       const palette = getThemeColors();
       const ds = filtered.map((it, idx) => {
         const color = palette[idx % palette.length] || '#333333';
+        const year = parseYear(it.label);
         return {
           label: it.label,
           // Si el valor es 0 o null, lo mostramos como null (Chart.js no dibuja)
@@ -163,19 +242,20 @@ function fetchData() {
           }),
           tension: 0.3,
           borderWidth: 2,
-          spanGaps: true, // 🔹 Une los tramos con datos, sin línea en los nulls
+          spanGaps: true, // Une tramos con datos, sin linea en los nulls
           borderColor: color,
           backgroundColor: hexToRgba(color, 0.12),
           pointBackgroundColor: color,
           fill: false,
+          order: -(year ?? idx),
         };
       });
 
-
-      const cfg = { type:'line', data:{labels:d.labels, datasets:ds},
+      const cfg = { type:'line', data:{labels:labels, datasets:ds},
         options:{ responsive:true, interaction:{mode:'index',intersect:false},
           scales:{ y:{ beginAtZero:true, ticks:{precision:0} } }, plugins:{ legend:{position:'top'} } } };
       if (chart) chart.destroy(); chart = new Chart(ctx, cfg);
+      renderTable(chart.data.labels, chart.data.datasets);
     })
     .catch(console.error);
 }

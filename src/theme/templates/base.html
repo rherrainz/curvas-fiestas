@@ -6,12 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Curvas Fiestas 2025 - LA</title>
   <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'img/register.ico' %}">
 </head>
 <body class="min-h-screen bg-base-100">
     <div class="navbar bg-base-100 shadow">
     <div class="max-w-6xl mx-auto w-full p-2 flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <a href="/" class="font-bold">Curvas Fiestas 2025 - LA</a>
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 font-bold">
+          <img src="{% static 'img/register.png' %}" alt="Logo" class="w-auto" style="height:50px;">
+          <span>Curvas Fiestas 2025</span>
+        </a>
         {% if user.is_authenticated %}
           <a href="/sales/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Ventas</a>
           <a href="/stock/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Stock</a>
@@ -24,7 +28,7 @@
         <div class="dropdown dropdown-end">
           <button class="btn btn-ghost btn-sm">{{ user.email }}</button>
           <ul class="dropdown-content menu bg-base-100 rounded-box w-52">
-            <li><a href="{% url 'authentication:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Cerrar Sesión</a></li>
+            <li><a href="{% url 'authentication:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Cerrar Sesi▋</a></li>
           </ul>
         </div>
         <form id="logout-form" method="POST" action="{% url 'authentication:logout' %}" style="display: none;">
@@ -35,6 +39,13 @@
       {% endif %}
     </div>
   </div>
+
   {% block content %}{% endblock %}
+
+  <footer class="footer footer-center m-16 p-16 bg-base-200 text-base-content mt-8">
+    <div>
+      <p class="text-center">Creado por <a href="mailto:rherrain@laanonima.com.ar" class="link">rherrain@laanonima.com.ar</a> para S.A. Imp. y Exp. de la Patagonia.</p>
+    </div>
+  </footer>
 </body>
 </html>
