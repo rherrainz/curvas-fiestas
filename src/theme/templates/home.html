@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto w-full px-4 py-6">
+  <table class="w-full text-center">
+    <tbody>
+      <tr class="align-top">
+        <td class="p-2">
+          <a href="/sales/curves/" class="block overflow-hidden rounded-xl shadow hover:shadow-lg transition mx-auto" style="max-width:400px; width:100%;">
+            <img src="{% static 'img/sales.png' %}" alt="Curvas de Ventas" class="w-full" style="max-width:400px; height:auto;">
+          </a>
+        </td>
+        <td class="p-2">
+          <a href="/stock/curves/" class="block overflow-hidden rounded-xl shadow hover:shadow-lg transition mx-auto" style="max-width:400px; width:100%;">
+            <img src="{% static 'img/stock.png' %}" alt="Curvas de Stock" class="w-full" style="max-width:400px; height:auto;">
+          </a>
+        </td>
+        <td class="p-2">
+          <a href="{% url 'insights:overview' %}" class="block overflow-hidden rounded-xl shadow hover:shadow-lg transition mx-auto" style="max-width:400px; width:100%;">
+            <img src="{% static 'img/situation.png' %}" alt="Situación Zona/Sucursal" class="w-full" style="max-width:400px; height:auto;">
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td class="p-2"><h3 class="text-sm font-semibold">Curvas de Ventas</h3></td>
+        <td class="p-2"><h3 class="text-sm font-semibold">Curvas de Stock</h3></td>
+        <td class="p-2"><h3 class="text-sm font-semibold">Situación (Zona/Sucursal)</h3></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from core.models import Region, Zone, Store
 
 class HomeView(TemplateView):
-    template_name = 'base.html'
+    template_name = 'home.html'
 
 def api_zones_by_region(request):
     region_id = request.GET.get("region_id")
