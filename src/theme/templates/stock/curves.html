@@ -52,6 +52,11 @@
 
   <div class="bg-base-100 p-6 rounded-xl shadow">
     <h2 class="text-xl font-semibold mb-4">Stock diario (3 años comparados)</h2>
+    <div class="flex justify-end gap-2 mb-2">
+      <button id="stockZoomIn" type="button" class="btn btn-xs">+</button>
+      <button id="stockZoomOut" type="button" class="btn btn-xs">-</button>
+      <button id="stockZoomReset" type="button" class="btn btn-xs">Reset</button>
+    </div>
     <canvas id="stockChart" height="120"></canvas>
   </div>
 
@@ -68,6 +73,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
 <script>
 const ZONES_URL  = "{% url 'core:zones_by_region' %}";
 const STORES_URL = "{% url 'core:stores_by_zone' %}";
@@ -81,6 +87,9 @@ const ctx     = document.getElementById('stockChart').getContext('2d');
 const $table  = document.getElementById('dataTable');
 const $tableNote = document.getElementById('tableNote');
 let chart;
+if (window.Chart && window["chartjs-plugin-zoom"]) {
+  Chart.register(window["chartjs-plugin-zoom"]);
+}
 
 function resetSelect($el, placeholder) {
   $el.innerHTML = '';
@@ -252,18 +261,44 @@ function fetchData() {
         };
       });
 
-      const cfg = { type:'line', data:{labels:labels, datasets:ds},
-        options:{ responsive:true, interaction:{mode:'index',intersect:false},
-          scales:{ y:{ beginAtZero:true, ticks:{precision:0} } }, plugins:{ legend:{position:'top'} } } };
+      const cfg = {
+        type:'line',
+        data:{labels:labels, datasets:ds},
+        options:{
+          responsive:true,
+          interaction:{mode:'index',intersect:false},
+          scales:{ y:{ beginAtZero:true, ticks:{precision:0} } },
+          plugins:{
+            legend:{position:'top'},
+            zoom:{
+              pan:{ enabled:true, mode:'x' },
+              zoom:{
+                wheel:{ enabled:true },
+                pinch:{ enabled:true },
+                mode:'x'
+              }
+            }
+          }
+        }
+      };
       if (chart) chart.destroy(); chart = new Chart(ctx, cfg);
       renderTable(chart.data.labels, chart.data.datasets);
     })
     .catch(console.error);
 }
 
+function bindZoomButtons() {
+  const btnIn    = document.getElementById('stockZoomIn');
+  const btnOut   = document.getElementById('stockZoomOut');
+  const btnReset = document.getElementById('stockZoomReset');
+  if (btnIn)    btnIn.addEventListener('click', () => { if (chart) chart.zoom(1.2); });
+  if (btnOut)   btnOut.addEventListener('click', () => { if (chart) chart.zoom(0.8); });
+  if (btnReset) btnReset.addEventListener('click', () => { if (chart) chart.resetZoom(); });
+}
+
 $form.addEventListener('submit', e => { e.preventDefault(); fetchData(); });
 
 // init
-document.addEventListener('DOMContentLoaded', async () => { fetchData(); });
+document.addEventListener('DOMContentLoaded', async () => { bindZoomButtons(); fetchData(); });
 </script>
 {% endblock %}
