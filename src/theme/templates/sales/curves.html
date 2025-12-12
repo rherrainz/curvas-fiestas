@@ -60,10 +60,12 @@
   <div class="bg-base-100 p-6 rounded-xl shadow">
     <h2 class="text-xl font-semibold mb-4">Detalle diario</h2>
     <div class="overflow-x-auto">
-      <table id="dataTable" class="table table-sm w-full text-sm">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
+      <div class="max-h-96 overflow-y-auto relative">
+        <table id="dataTable" class="table table-sm w-full text-sm">
+          <thead class="sticky top-0 z-10 bg-base-200"></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     <p id="tableNote" class="text-xs opacity-60 mt-2"></p>
   </div>
@@ -158,6 +160,12 @@ function formatPercent(delta) {
   const sign = num > 0 ? '+' : '';
   return `${sign}${num.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 }
+function semaforoEmoji(pct) {
+  if (pct === null || pct === undefined || Number.isNaN(pct)) return '';
+  if (pct > 10) return '🟢';
+  if (pct < -10) return '🔴';
+  return '🟡';
+}
 function pctDiff(a, b) {
   if (a === null || a === undefined || b === null || b === undefined || Number(b) === 0) return null;
   return ((Number(a) / Number(b)) - 1) * 100;
@@ -189,9 +197,11 @@ function renderTable(labels, datasets) {
     const v2025 = (yearData.get(2025) || [])[idx];
     const v2024 = (yearData.get(2024) || [])[idx];
     const v2023 = (yearData.get(2023) || [])[idx];
-    const diff25_24 = formatPercent(pctDiff(v2025, v2024));
-    const diff25_23 = formatPercent(pctDiff(v2025, v2023));
-    return `<tr><th class="font-normal">${lab}</th>${valueCells}<td class="text-right">${diff25_24}</td><td class="text-right">${diff25_23}</td></tr>`;
+    const pct25_24 = pctDiff(v2025, v2024);
+    const pct25_23 = pctDiff(v2025, v2023);
+    const diff25_24 = formatPercent(pct25_24);
+    const diff25_23 = formatPercent(pct25_23);
+    return `<tr><th class="font-normal">${lab}</th>${valueCells}<td class="text-right">${semaforoEmoji(pct25_24)} ${diff25_24}</td><td class="text-right">${semaforoEmoji(pct25_23)} ${diff25_23}</td></tr>`;
   }).join('');
   tbody.innerHTML = rows;
 
