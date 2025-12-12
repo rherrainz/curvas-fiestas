@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Max
 from django.db.models.functions import TruncMonth, TruncDay, ExtractYear
 from datetime import timedelta
 from core.models import Region, Zone, Store, Family
@@ -36,6 +36,119 @@ def curves_view(request):
         "families": families,
     })
 
+
+# ---------------------------
+# Ventas por sucursal dentro de una zona (último año disponible)
+# ---------------------------
+
+def sales_by_zone_view(request):
+    zones = Zone.objects.order_by("name")
+    families = Family.objects.filter(is_active=True).order_by("origen","familia_std","subfamilia_std")
+    default_zone = zones.first()
+    return render(request, "sales/by_zone.html", {
+        "zones": zones,
+        "families": families,
+        "default_zone_id": default_zone.id if default_zone else "",
+    })
+
+
+def sales_by_zone_data(request):
+    zone_id = request.GET.get("zone_id")
+    family_id = request.GET.get("family_id") or None
+
+    # zona por defecto = primera por nombre
+    if not zone_id:
+        default_zone = Zone.objects.order_by("name").first()
+        if not default_zone:
+            return JsonResponse({"labels": [], "data": [], "meta": {"note": "No hay zonas definidas."}})
+        zone_id = default_zone.id
+
+    pivot_year = _latest_sales_year()
+    if not pivot_year:
+        return JsonResponse({"labels": [], "data": [], "meta": {"note": "Sin datos de ventas."}})
+
+    start, end = christmas_period(pivot_year)
+    # limitar el fin al último día con datos en el año pivot
+    max_date = (
+        SalesRecord.objects
+        .filter(store__zone_id=zone_id, date__year=pivot_year)
+        .aggregate(Max("date"))
+        .get("date__max")
+    )
+    end_date = max_date if max_date and max_date >= start else end
+
+    filters = {
+        "store__zone_id": zone_id,
+        "store__is_distribution_center": False,
+        "date__range": (start, end_date),
+    }
+    if family_id:
+        filters["family_id"] = family_id
+
+    # ventas diarias por sucursal
+    daily = (
+        SalesRecord.objects
+        .filter(**filters)
+        .values("store_id", "store__code", "store__name", "date")
+        .annotate(units=Sum("units_sold"))
+    )
+
+    # eje X (MM-DD)
+    labels = []
+    cur = start
+    while cur <= end_date:
+        labels.append(cur.strftime("%m-%d"))
+        cur += timedelta(days=1)
+
+    # agrupar por store
+    store_data = {}
+    for row in daily:
+        sid = row["store_id"]
+        info = store_data.setdefault(sid, {
+            "label": f"{row['store__code']} - {row['store__name']}".strip(" -"),
+            "map": {},
+        })
+        info["map"][row["date"]] = float(row["units"] or 0)
+
+    datasets = []
+    total_units = 0.0
+    for sid, info in store_data.items():
+        series = []
+        acc = 0.0
+        cur = start
+        while cur <= end_date:
+            acc += info["map"].get(cur, 0.0)
+            series.append(acc)
+            cur += timedelta(days=1)
+        if sum(series) <= 0:
+            continue
+        total_units += series[-1] if series else 0.0
+        datasets.append({
+            "label": info["label"],
+            "data": series,
+        })
+
+    zone_name = ""
+    try:
+        zone_name = Zone.objects.get(id=zone_id).name
+    except Zone.DoesNotExist:
+        pass
+
+    return JsonResponse({
+        "labels": labels,
+        "datasets": datasets,
+        "meta": {
+            "zone_id": zone_id,
+            "zone_name": zone_name,
+            "pivot_year": pivot_year,
+            "start_date": start.isoformat(),
+            "end_date": end_date.isoformat(),
+            "family_id": family_id,
+            "total_units": total_units,
+            "note": "Ventas acumuladas por sucursal dentro de la zona en el último año disponible.",
+        }
+    })
+
 def _years_to_compare(pivot_year: int, available: list[int]) -> list[int]:
     """Devuelve hasta tres años: pivot-2, pivot-1, pivot (en ese orden) filtrando por los que existen."""
     candidates = [pivot_year - 2, pivot_year - 1, pivot_year]
@@ -48,6 +161,10 @@ def _available_years():
     y2 = StockRecord.objects.annotate(y=ExtractYear("date")).values_list("y", flat=True)
     return sorted({int(y) for y in list(y1) + list(y2) if y is not None})
 
+def _latest_sales_year():
+    vals = SalesRecord.objects.annotate(y=ExtractYear("date")).values_list("y", flat=True)
+    years = [int(v) for v in vals if v is not None]
+    return max(years) if years else None
 def _coherent_scope_from_request(request):
     """Devuelve un dict con filtros coherentes. Si hay sucursal, fuerza region/zone a las de la sucursal."""
     region_id = request.GET.get("region_id") or None
