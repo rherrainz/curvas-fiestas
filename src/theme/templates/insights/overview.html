@@ -74,12 +74,12 @@
         <thead>
           <tr>
             <th>SubFamilia</th>
-            <th>UV Act Acum</th>
-            <th>Stock Actual</th>
-            <th>Stk + Vta Act Acum</th>
-            <th>UV Totales Año Ant</th>
-            <th>Stk+Vta Act / UV Ant</th>
-            <th>UV Act/Ant</th>
+            <th class="text-right">UV Act Acum</th>
+            <th class="text-right">Stock Actual</th>
+            <th class="text-right">Stk + Vta Act Acum</th>
+            <th class="text-right">UV Totales Año Ant</th>
+            <th class="text-right">Stk+Vta Act / UV Ant</th>
+            <th class="text-right">UV Act/Ant</th>
           </tr>
         </thead>
         <tbody id="insightsBody"></tbody>
@@ -211,9 +211,11 @@
     const d = await r.json();
 
     const meta = d.meta || {};
-    $cutInfo.textContent = `Corte: ${meta.cut_date || "-"} · Año actual: ${
-      meta.pivot_year || "-"
-    } · Año anterior: ${meta.prev_year || "-"}`;
+    $cutInfo.textContent = `Corte: ${meta.cut_date || "-"} · Stock usado: ${
+      meta.stock_date || "-"
+    } · Año actual: ${meta.pivot_year || "-"} · Año anterior: ${
+      meta.prev_year || "-"
+    }`;
 
     $tbody.innerHTML = "";
 
@@ -232,12 +234,12 @@
         `
     <tr>
       <td>${row.subfamily || "—"}</td>
-      <td>${n(row.uv_act_cum)}</td>
-      <td>${n(row.stock_act)}</td>
-      <td class="font-semibold">${n(row.stock_plus_uv_act)}</td>
-      <td>${n(row.uv_prev_total)}</td>
-      <td>${emoji1} ${pct1 != null ? n(pct1, 1) + "%" : ""}</td>
-      <td>${emoji2} ${pct2 != null ? n(pct2, 1) + "%" : ""}</td>
+      <td class="text-right">${n(row.uv_act_cum)}</td>
+      <td class="text-right">${n(row.stock_act)}</td>
+      <td class="text-right font-semibold">${n(row.stock_plus_uv_act)}</td>
+      <td class="text-right">${n(row.uv_prev_total)}</td>
+      <td class="text-right">${emoji1} ${pct1 != null ? n(pct1, 1) + "%" : ""}</td>
+      <td class="text-right">${emoji2} ${pct2 != null ? n(pct2, 1) + "%" : ""}</td>
     </tr>
   `
       );
