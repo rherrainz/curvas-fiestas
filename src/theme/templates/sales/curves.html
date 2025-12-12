@@ -3,11 +3,14 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto p-6 space-y-6">
-  <div>
-    <h1 class="text-3xl font-bold">Curvas de Ventas Acumuladas</h1>
-    <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong> por
-      <strong>Sucursal/Zona/Región/Total Compañía</strong>.
-    </p>
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold">Curvas de Ventas Acumuladas</h1>
+      <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong> por
+        <strong>Sucursal/Zona/Región/Total Compañía</strong>.
+      </p>
+    </div>
+    <a href="{% url 'sales:sales_by_zone' %}" class="btn btn-sm btn-secondary mt-1">Comparar por zona</a>
   </div>
 
   <form id="filters" class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-base-100 p-4 rounded-xl shadow">
