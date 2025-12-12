@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Max
 from django.db.models.functions import ExtractYear
 
 from core.models import Region, Zone, Store, Family
@@ -130,13 +130,35 @@ def overview_data(request):
         fid = r["family__id"]
         sales_act_map[fid] = float(r["units"] or 0)
 
-    # ---------- 2) Stock Actual (día target, año pivot) ----------
-    stock_act_qs = (
+    # ---------- 2) Stock Actual (último stock disponible hasta la fecha de corte, año pivot) ----------
+    stock_filters = {"date__range": (s_act_start, target)}
+    stock_filters.update(base)
+    if source == "stores":
+        stock_filters["store__is_distribution_center"] = False
+    elif source == "cdr":
+        stock_filters["store__is_distribution_center"] = True
+
+    last_stock_date = (
         StockRecord.objects
-        .filter(date=target, **base)
-        .values("family__id", "family__origen")
-        .annotate(units=Sum("stock_units"))
+        .filter(**stock_filters)
+        .aggregate(Max("date"))
+        .get("date__max")
     )
+
+    stock_act_qs = []
+    if last_stock_date:
+        stock_day_filters = {"date": last_stock_date}
+        stock_day_filters.update(base)
+        if source == "stores":
+            stock_day_filters["store__is_distribution_center"] = False
+        elif source == "cdr":
+            stock_day_filters["store__is_distribution_center"] = True
+        stock_act_qs = (
+            StockRecord.objects
+            .filter(**stock_day_filters)
+            .values("family__id", "family__origen")
+            .annotate(units=Sum("stock_units"))
+        )
 
     stock_act_map = {}
     for r in stock_act_qs:
@@ -191,7 +213,8 @@ def overview_data(request):
             "pivot_year": pivot,
             "prev_year": prev_year,
             "cut_date": target.isoformat(),
-            "note": "UV Act: 1/oct–fecha corte año actual (agregado por familia). UV Ant: 1/oct–31/dic año anterior.",
+            "stock_date": (last_stock_date or target).isoformat(),
+            "note": "UV Act: 1/oct-fecha corte año actual (agregado por familia). UV Ant: 1/oct-31/dic año anterior.",
         },
         "rows": rows,
     })
