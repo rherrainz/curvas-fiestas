@@ -185,6 +185,7 @@ def overview_data(request):
     for fam in families:
         fid    = fam.id
         subfam = fam.origen
+        helper = f"{fam.sector} | {fam.familia_std} | {fam.subfamilia_std}"
 
         uv_act   = sales_act_map.get(fid, 0.0)
         stk_act  = stock_act_map.get(fid, 0.0)
@@ -200,6 +201,7 @@ def overview_data(request):
 
         rows.append({
             "subfamily": subfam,
+            "family_helper": helper,
             "uv_act_cum": uv_act,
             "stock_act": stk_act,
             "stock_plus_uv_act": stk_plus,
