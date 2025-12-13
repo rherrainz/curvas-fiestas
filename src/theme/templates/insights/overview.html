@@ -228,12 +228,13 @@
 
       const emoji1 = semaforoEmoji(pct1);
       const emoji2 = semaforoEmoji(pct2);
+      const helper = row.family_helper || "";
 
       $tbody.insertAdjacentHTML(
         "beforeend",
         `
     <tr>
-      <td>${row.subfamily || "—"}</td>
+      <td title="${helper}">${row.subfamily || "—"}${helper ? `<span class="opacity-60 text-xs block">${helper}</span>` : ""}</td>
       <td class="text-right">${n(row.uv_act_cum)}</td>
       <td class="text-right">${n(row.stock_act)}</td>
       <td class="text-right font-semibold">${n(row.stock_plus_uv_act)}</td>
