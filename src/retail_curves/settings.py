@@ -54,6 +54,11 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://curvas-fiestas-production.up.railway.app",
+    "https://*.up.railway.app",
+]
+
 
 # Application definition
 
