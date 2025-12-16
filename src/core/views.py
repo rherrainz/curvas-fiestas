@@ -1,11 +1,14 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from core.models import Region, Zone, Store
 
-class HomeView(TemplateView):
+class HomeView(LoginRequiredMixin, TemplateView):
     template_name = 'home.html'
 
+@login_required
 def api_zones_by_region(request):
     region_id = request.GET.get("region_id")
     if not region_id:
@@ -13,6 +16,7 @@ def api_zones_by_region(request):
     zones = Zone.objects.filter(region_id=region_id).order_by("name").values("id", "name")
     return JsonResponse({"items": list(zones)})
 
+@login_required
 def api_stores_by_zone(request):
     zone_id = request.GET.get("zone_id")
     if not zone_id:
@@ -22,6 +26,7 @@ def api_stores_by_zone(request):
     items = [{"id": s["code"], "label": f'{s["code"]} - {s["name"]}' if s["name"] else s["code"]} for s in stores]
     return JsonResponse({"items": items})
 
+@login_required
 def api_store_info(request):
     code = request.GET.get("code")
     try:

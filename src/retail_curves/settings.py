@@ -90,6 +90,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'retail_curves.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -205,3 +206,12 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@laanonima.com
 LOGIN_URL = 'authentication:login_request'
 LOGIN_REDIRECT_URL = 'home'
 ALLOWED_DOMAIN = "@laanonima.com.ar"
+
+# Rutas permitidas sin autenticacion (prefijos con /)
+LOGIN_EXEMPT_PREFIXES = [
+    '/auth/login/',
+    '/auth/verify/',
+    '/auth/logout/',
+    '/admin/login/',
+    '/admin/jsi18n/',
+]
