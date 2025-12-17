@@ -177,8 +177,8 @@ function formatPercent(delta) {
 }
 function semaforoEmoji(pct) {
   if (pct === null || pct === undefined || Number.isNaN(pct)) return '';
-  if (pct > 10) return '🟢';
-  if (pct < -10) return '🔴';
+  if (pct > 0) return '🟢';
+  if (pct < -5) return '🔴';
   return '🟡';
 }
 function pctDiff(a, b) {

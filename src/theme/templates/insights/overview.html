@@ -88,7 +88,7 @@
   </div>
   <p class="mt-2 text-xs opacity-70">
   <strong>Semáforo:</strong>
-  🟢 &gt; +10% · 🟡 entre -10% y +10% · 🔴 &lt; -10% vs UV año anterior.
+  🟢 &gt; 0% · 🟡 entre -5% y 0% · 🔴 &lt; -5% vs UV año anterior.
 </p>
 
 </div>
@@ -112,16 +112,16 @@
 
   function semaforoClass(pct) {
     if (pct == null) return "";
-    if (pct > 10) return "text-success font-semibold"; // > +10% → verde
-    if (pct < -10) return "text-error font-semibold"; // < -10% → rojo
-    return "text-warning font-semibold"; // entre -10% y +10% → amarillo
+    if (pct > 0) return "text-success font-semibold"; // > 0%  verde
+    if (pct < -5) return "text-error font-semibold"; // < -5%  rojo
+    return "text-warning font-semibold"; // entre -5% y 0%  amarillo
   }
 
   function semaforoEmoji(pct) {
-    if (pct == null) return "—";
-    if (pct > 10) return "🟢"; // más del 10% arriba del año pasado
-    if (pct < -10) return "🔴"; // más del 10% abajo del año pasado
-    return "🟡"; // rango neutro
+    if (pct == null) return "-";
+    if (pct > 0) return "🟢"; // arriba del a¤o pasado
+    if (pct < -5) return "🔴"; // abajo del a¤o pasado
+    return "🟡"; // entre -5% y 0%
   }
 
   $region.addEventListener("change", async (e) => {
