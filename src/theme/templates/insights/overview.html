@@ -226,6 +226,15 @@
       const pct1 = ratio1 != null ? (ratio1 - 1) * 100 : null;
       const pct2 = ratio2 != null ? (ratio2 - 1) * 100 : null;
 
+      const diffStkPlusVsPrev =
+        row.stock_plus_uv_act != null && row.uv_prev_total != null
+          ? row.stock_plus_uv_act - row.uv_prev_total
+          : null;
+      const diffUvActVsPrev =
+        row.uv_act_cum != null && row.uv_prev_total != null
+          ? row.uv_act_cum - row.uv_prev_total
+          : null;
+
       const emoji1 = semaforoEmoji(pct1);
       const emoji2 = semaforoEmoji(pct2);
       const helper = row.family_helper || "";
@@ -239,8 +248,14 @@
       <td class="text-right">${n(row.stock_act)}</td>
       <td class="text-right font-semibold">${n(row.stock_plus_uv_act)}</td>
       <td class="text-right">${n(row.uv_prev_total)}</td>
-      <td class="text-right">${emoji1} ${pct1 != null ? n(pct1, 1) + "%" : ""}</td>
-      <td class="text-right">${emoji2} ${pct2 != null ? n(pct2, 1) + "%" : ""}</td>
+      <td class="text-right">
+        ${emoji1} ${pct1 != null ? n(pct1, 1) + "%" : ""}
+        <span class="opacity-60 text-xs block">${n(diffStkPlusVsPrev)}</span>
+      </td>
+      <td class="text-right">
+        ${emoji2} ${pct2 != null ? n(pct2, 1) + "%" : ""}
+        <span class="opacity-60 text-xs block">${n(diffUvActVsPrev)}</span>
+      </td>
     </tr>
   `
       );
