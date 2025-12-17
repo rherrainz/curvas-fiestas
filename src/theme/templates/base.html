@@ -9,34 +9,62 @@
   <link rel="icon" type="image/x-icon" href="{% static 'img/register.ico' %}">
 </head>
 <body class="min-h-screen bg-base-100">
-    <div class="navbar bg-base-100 shadow">
-    <div class="max-w-6xl mx-auto w-full p-2 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 font-bold">
-          <img src="{% static 'img/register.png' %}" alt="Logo" class="w-auto" style="height:50px;">
-          <span>Curvas Fiestas 2025</span>
-        </a>
+  <div class="navbar bg-base-100 shadow">
+    <div class="max-w-6xl mx-auto w-full px-2 sm:px-4">
+      <div class="navbar-start gap-2">
         {% if user.is_authenticated %}
-          <a href="/sales/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Ventas</a>
-          <a href="/stock/curves/" class="btn btn-ghost btn-sm ml-4">Curvas de Stock</a>
-          <a href="{% url 'insights:overview' %}" class="btn btn-ghost btn-sm ml-4">Situación (Zona/Sucursal)</a>
-          <a href="/imports/upload/" class="btn btn-ghost btn-sm ml-4">Importar</a>
+          <div class="dropdown lg:hidden">
+            <label tabindex="0" class="btn btn-ghost btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </label>
+            <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-56">
+              <li><a href="/sales/curves/">Curvas de Ventas</a></li>
+              <li><a href="/stock/curves/">Curvas de Stock</a></li>
+              <li><a href="{% url 'insights:overview' %}">Situación (Zona/Sucursal)</a></li>
+              <li><a href="/imports/upload/">Importar</a></li>
+            </ul>
+          </div>
         {% endif %}
+
+        <a href="/" class="flex items-center gap-2 font-bold">
+          <img src="{% static 'img/register.png' %}" alt="Logo" class="w-auto h-10 sm:h-12">
+          <span class="hidden sm:inline">Curvas Fiestas 2025</span>
+          <span class="sm:hidden">Curvas</span>
+        </a>
       </div>
-      
+
       {% if user.is_authenticated %}
-        <div class="dropdown dropdown-end">
-          <button class="btn btn-ghost btn-sm">{{ user.email }}</button>
-          <ul class="dropdown-content menu bg-base-100 rounded-box w-52">
-            <li><a href="{% url 'authentication:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Cerrar Sesi▋</a></li>
+        <div class="navbar-center hidden lg:flex">
+          <ul class="menu menu-horizontal px-1">
+            <li><a href="/sales/curves/">Curvas de Ventas</a></li>
+            <li><a href="/stock/curves/">Curvas de Stock</a></li>
+            <li><a href="{% url 'insights:overview' %}">Situación (Zona/Sucursal)</a></li>
+            <li><a href="/imports/upload/">Importar</a></li>
           </ul>
         </div>
-        <form id="logout-form" method="POST" action="{% url 'authentication:logout' %}" style="display: none;">
-          {% csrf_token %}
-        </form>
-      {% else %}
-        <a href="{% url 'authentication:login_request' %}" class="btn btn-primary btn-sm">Iniciar Sesión</a>
       {% endif %}
+
+      <div class="navbar-end">
+        {% if user.is_authenticated %}
+          <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-sm max-w-[12rem] sm:max-w-[20rem] truncate">{{ user.email }}</button>
+            <ul class="dropdown-content menu bg-base-100 rounded-box w-52 shadow">
+              <li>
+                <a href="{% url 'authentication:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                  Cerrar sesión
+                </a>
+              </li>
+            </ul>
+          </div>
+          <form id="logout-form" method="POST" action="{% url 'authentication:logout' %}" class="hidden">
+            {% csrf_token %}
+          </form>
+        {% else %}
+          <a href="{% url 'authentication:login_request' %}" class="btn btn-primary btn-sm">Iniciar sesión</a>
+        {% endif %}
+      </div>
     </div>
   </div>
 
@@ -44,7 +72,10 @@
 
   <footer class="footer footer-center m-4 p-4 bg-base-200 text-base-content mt-8">
     <div>
-      <p class="text-center">Creado por <a href="mailto:rherrain@laanonima.com.ar" class="link">rherrain@laanonima.com.ar</a> para S.A. Imp. y Exp. de la Patagonia.</p>
+      <p class="text-center">
+        Creado por <a href="mailto:rherrain@laanonima.com.ar" class="link">rherrain@laanonima.com.ar</a>
+        para S.A. Imp. y Exp. de la Patagonia.
+      </p>
     </div>
   </footer>
 </body>

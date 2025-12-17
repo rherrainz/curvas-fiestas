@@ -33,5 +33,31 @@
     --color-success: #2E5C4B;
     --color-warning: #C8A95E;
     --color-error: #B33643;
+
+    /* Paleta exclusiva para gráficos (20 colores).
+       Primeros 3: colores del tema navideño (verde/rojo/amarillo) y luego tonos distinguibles. */
+    --chart-1:  #2E5C4B; /* verde navidad */
+    --chart-2:  #B33643; /* rojo navidad */
+    --chart-3:  #C8A95E; /* amarillo / dorado navidad */
+
+    --chart-4:  #2563EB; /* azul */
+    --chart-5:  #0EA5E9; /* celeste */
+    --chart-6:  #22C55E; /* verde claro */
+    --chart-7:  #CBD5E1; /* gris claro */
+    --chart-8:  #334155; /* gris oscuro */
+    --chart-9:  #FDE68A; /* amarillo claro */
+    --chart-10: #FBCFE8; /* rosa pastel */
+    --chart-11: #BAE6FD; /* celeste pastel */
+    --chart-12: #FED7AA; /* naranja pastel */
+    --chart-13: #D2B48C; /* marrón claro */
+    --chart-14: #7B4F2C; /* marrón oscuro */
+    --chart-15: #7A1F2B; /* bordó */
+    --chart-16: #FDA4AF; /* salmón */
+
+    /* Extras para completar 20 sin parecerse demasiado */
+    --chart-17: #7C3AED; /* violeta */
+    --chart-18: #14B8A6; /* turquesa */
+    --chart-19: #6366F1; /* índigo */
+    --chart-20: #0891B2; /* cian oscuro */
   }
 }

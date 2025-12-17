@@ -2,18 +2,18 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto p-6 space-y-6">
-  <div class="flex items-start justify-between gap-4">
+<div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
     <div>
       <h1 class="text-3xl font-bold">Curvas de Ventas Acumuladas</h1>
       <p class="text-sm opacity-70">Período 1/oct – 31/dic. Comparación de <strong>3 años</strong> por
         <strong>Sucursal/Zona/Región/Total Compañía</strong>.
       </p>
     </div>
-    <a href="{% url 'sales:sales_by_zone' %}" class="btn btn-sm btn-secondary mt-1">Comparar por zona</a>
+    <a href="{% url 'sales:sales_by_zone' %}" class="btn btn-sm btn-secondary w-full sm:w-auto">Comparar por zona</a>
   </div>
 
-  <form id="filters" class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-base-100 p-4 rounded-xl shadow">
+  <form id="filters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-base-100 p-4 rounded-xl shadow">
     <div>
       <label class="label"><span class="label-text">Región</span></label>
       <select class="select select-bordered w-full" name="region_id" id="region">
@@ -35,7 +35,7 @@
         <option value="">Todas</option>
       </select>
     </div>
-    <div class="md:col-span-2">
+    <div class="sm:col-span-2 lg:col-span-2">
       <label class="label"><span class="label-text">Familia (origen)</span></label>
       <select class="select select-bordered w-full" name="family_id" id="family">
         <option value="">Todas</option>
@@ -44,26 +44,28 @@
         {% endfor %}
       </select>
     </div>
-    <div class="md:col-span-5 text-right">
-      <button type="submit" class="btn btn-primary">Actualizar gráfico</button>
+    <div class="sm:col-span-2 lg:col-span-5 flex justify-end">
+      <button type="submit" class="btn btn-primary w-full sm:w-auto">Actualizar gráfico</button>
     </div>
   </form>
 
-  <div class="bg-base-100 p-6 rounded-xl shadow">
+  <div class="bg-base-100 p-4 sm:p-6 rounded-xl shadow">
     <h2 class="text-xl font-semibold mb-4">Ventas acumuladas (3 años comparados)</h2>
     <div class="flex justify-end gap-2 mb-2">
       <button id="salesZoomIn" type="button" class="btn btn-xs">+</button>
       <button id="salesZoomOut" type="button" class="btn btn-xs">-</button>
       <button id="salesZoomReset" type="button" class="btn btn-xs">Reset</button>
     </div>
-    <canvas id="curveChart" height="120"></canvas>
+    <div class="relative w-full h-64 sm:h-80">
+      <canvas id="curveChart" class="w-full h-full"></canvas>
+    </div>
     <p id="metaInfo" class="text-xs opacity-60 mt-2"></p>
   </div>
 
-  <div class="bg-base-100 p-6 rounded-xl shadow">
+  <div class="bg-base-100 p-4 sm:p-6 rounded-xl shadow">
     <h2 class="text-xl font-semibold mb-4">Detalle diario</h2>
     <div class="overflow-x-auto">
-      <div class="max-h-96 overflow-y-auto relative">
+      <div class="max-h-[60vh] sm:max-h-96 overflow-y-auto relative">
         <table id="dataTable" class="table table-sm w-full text-sm">
           <thead class="sticky top-0 z-10 bg-base-200"></thead>
           <tbody></tbody>
@@ -136,8 +138,18 @@ $zone.addEventListener('change', e => loadStores(e.target.value));
 
 function getThemeColors() {
   const s = getComputedStyle(document.documentElement);
-  const keys = ['--color-primary','--color-secondary','--color-accent','--color-neutral','--color-info','--color-success','--color-warning','--color-error'];
-  return keys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
+  const chartKeys = Array.from({ length: 20 }, (_, i) => `--chart-${i + 1}`);
+  const chartColors = chartKeys.map(k => (s.getPropertyValue(k) || '').trim()).filter(Boolean);
+  const fallback = [
+    '#2563eb', '#dc2626', '#16a34a', '#f59e0b', '#7c3aed',
+    '#0ea5e9', '#f97316', '#be123c', '#22c55e', '#a855f7',
+    '#14b8a6', '#ef4444', '#6366f1', '#84cc16', '#d946ef',
+    '#0891b2', '#9333ea', '#0284c7', '#ea580c', '#334155',
+  ];
+
+  const palette = [...chartColors];
+  while (palette.length < 20) palette.push(fallback[(palette.length - chartColors.length) % fallback.length]);
+  return palette.slice(0, 20);
 }
 function hexToRgba(hex, a) {
   if (!hex) return null; const h = hex.replace('#',''); const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h; const bigint = parseInt(full,16); const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255; return `rgba(${r}, ${g}, ${b}, ${a})`;
@@ -259,6 +271,7 @@ function fetchData() {
       data:{ labels: displayLabels, datasets: ds },
       options: {
         responsive:true,
+        maintainAspectRatio:false,
         interaction:{mode:'index', intersect:false},
         scales:{ y:{ beginAtZero:true, ticks:{ precision:0 }}},
         plugins:{
