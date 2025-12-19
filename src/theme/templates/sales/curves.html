@@ -248,7 +248,7 @@ function fetchData() {
       let last = nums.length - 1; while (last >= 0 && (nums[last] === null || nums[last] === undefined)) last--;
       if (last < 0) return { label: it.label, raw: nums.map(()=>null) };
       const tailVal = nums[last]; let p = last; while (p >= 0 && nums[p] === tailVal) p--; const runStart = p + 1;
-      const trimmed = nums.map((v, idx) => idx >= runStart ? null : v);
+      const trimmed = nums.map((v, idx) => idx > runStart ? null : v);
       return { label: it.label, raw: trimmed };
     });
 
