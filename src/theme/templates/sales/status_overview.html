@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold">Estado de ventas 2025</h1>
+      <p class="text-sm opacity-70">Corte en el ultimo dia cargado de 2025, comparado contra el mismo rango de 2024.</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+      <a href="{% url 'sales:sales_curves' %}" class="btn btn-ghost btn-sm w-full sm:w-auto">Regresar a curvas</a>
+      <a href="{% url 'sales:sales_by_zone' %}" class="btn btn-ghost btn-sm w-full sm:w-auto">Comparar por zona</a>
+    </div>
+  </div>
+
+  <form id="filters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-base-100 p-4 rounded-xl shadow">
+    <div class="sm:col-span-2 lg:col-span-2">
+      <label class="label"><span class="label-text">Region</span></label>
+      <select class="select select-bordered w-full" name="region_id" id="region">
+        {% for r in regions %}
+          <option value="{{ r.id }}" {% if default_region_id and r.id == default_region_id %}selected{% endif %}>{{ r.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="sm:col-span-2 lg:col-span-2">
+      <label class="label"><span class="label-text">Zona (opcional)</span></label>
+      <select class="select select-bordered w-full" name="zone_id" id="zone" disabled>
+        <option value="">Todas</option>
+      </select>
+      <p class="text-xs opacity-70 mt-1">Si se deja vacio, las columnas muestran zonas de la region. Si se elige zona, las columnas son las sucursales.</p>
+    </div>
+    <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
+      <button type="submit" class="btn btn-primary w-full sm:w-auto">Actualizar estado</button>
+    </div>
+  </form>
+
+  <div class="bg-base-100 p-4 sm:p-6 rounded-xl shadow space-y-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-semibold">Comparativo por familia</h2>
+        <p id="metaInfo" class="text-xs opacity-60"></p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <div class="max-h-[70vh] overflow-y-auto relative">
+        <table id="statusTable" class="table table-sm w-full text-sm">
+          <thead class="sticky top-0 z-10 bg-base-200"></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ZONES_URL = "{% url 'core:zones_by_region' %}";
+const DATA_URL  = "{% url 'sales:status_overview_data' %}";
+
+const $region = document.getElementById('region');
+const $zone = document.getElementById('zone');
+const $form = document.getElementById('filters');
+const $table = document.getElementById('statusTable');
+const $meta = document.getElementById('metaInfo');
+
+function resetSelect($el, placeholder) {
+  $el.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = '';
+  opt.textContent = placeholder || 'Todas';
+  $el.appendChild(opt);
+}
+
+async function loadZones(regionId) {
+  resetSelect($zone, 'Todas');
+  $zone.disabled = true;
+  if (!regionId) { $zone.disabled = false; return; }
+  try {
+    const r = await fetch(`${ZONES_URL}?region_id=${encodeURIComponent(regionId)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    for (const z of (data.items || [])) {
+      const opt = document.createElement('option');
+      opt.value = z.id;
+      opt.textContent = z.name;
+      $zone.appendChild(opt);
+    }
+  } catch (e) {
+    console.error("Error cargando zonas:", e);
+  } finally {
+    $zone.disabled = false;
+  }
+}
+
+$region.addEventListener('change', e => loadZones(e.target.value));
+
+function formatNumber(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+  return Number(v).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function formatSigned(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+  const n = Number(v);
+  const sign = n > 0 ? '+' : '';
+  return `${sign}${formatNumber(n)}`;
+}
+function formatPercent(delta) {
+  if (delta === null || delta === undefined || Number.isNaN(delta)) return '';
+  const num = Number(delta);
+  const sign = num > 0 ? '+' : '';
+  return `${sign}${num.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+}
+function semaforoBgStyle(pct) {
+  if (pct === null || pct === undefined || Number.isNaN(pct)) return '';
+  if (pct > 0) return 'background-color:#dcfce7;';   // verde claro
+  if (pct < -5) return 'background-color:#fee2e2;';  // rojo claro
+  return 'background-color:#fef9c3;';                // amarillo claro
+}
+
+function clearTable() {
+  if (!$table) return;
+  $table.querySelector('thead').innerHTML = '';
+  $table.querySelector('tbody').innerHTML = '';
+}
+
+function renderTable(data) {
+  if (!$table) return;
+  const columns = data.columns || [];
+  const rows = data.rows || [];
+
+  if (columns.length === 0) {
+    clearTable();
+    $meta.textContent = data.meta?.note || "Sin columnas para mostrar.";
+    return;
+  }
+
+  const thead = $table.querySelector('thead');
+  const tbody = $table.querySelector('tbody');
+
+  const headCols = columns.map(col => `<th class="text-right">${col.label}</th>`).join('');
+  thead.innerHTML = `<tr><th>Familia</th>${headCols}</tr>`;
+
+  const bodyRows = rows.map(row => {
+    const cells = columns.map(col => {
+      const found = (row.cells || []).find(c => String(c.entity_id) === String(col.id)) || {};
+      const pct = found.pct;
+      const delta = found.delta_units;
+      const pctText = formatPercent(pct) || '-';
+      const unitsText = formatSigned(delta) || '';
+      const bgStyle = semaforoBgStyle(pct);
+      return `<td class="align-middle" style="${bgStyle}">
+        <div class="flex items-center justify-end gap-2">
+          <span class="font-semibold text-base leading-tight">${pctText}</span>
+        </div>
+        <div class="text-[11px] opacity-70 text-right">${unitsText}</div>
+      </td>`;
+    }).join('');
+    return `<tr><th class="font-semibold text-sm">${row.family_label}</th>${cells}</tr>`;
+    }).join('');
+
+  tbody.innerHTML = bodyRows;
+
+  const meta = data.meta || {};
+  const period = meta.start_date && meta.end_date ? `${meta.start_date} a ${meta.end_date}` : '';
+  const base = meta.prev_start_date && meta.prev_end_date ? `${meta.prev_start_date} a ${meta.prev_end_date}` : '';
+  $meta.textContent = `Periodo pivot: ${period || '-'} - Base 2024: ${base || '-'} - ${meta.note || ''}`;
+}
+
+function fetchData() {
+  const params = new URLSearchParams(new FormData($form));
+  fetch(`${DATA_URL}?${params.toString()}`)
+    .then(r => r.json())
+    .then(d => renderTable(d))
+    .catch(err => { console.error(err); $meta.textContent = "Error al cargar datos."; });
+}
+
+$form.addEventListener('submit', e => { e.preventDefault(); fetchData(); });
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if ($region.value) { await loadZones($region.value); }
+  fetchData();
+});
+</script>
+{% endblock %}
