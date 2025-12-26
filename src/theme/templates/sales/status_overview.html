@@ -3,6 +3,61 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+  <style>
+    /* Fija la primera columna al hacer scroll horizontal */
+    #statusTable th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--b1, #ffffff);
+    }
+    #statusTable tbody th:first-child {
+      z-index: 1;
+    }
+    /* Modal simple */
+    #tableModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+    #tableModal.active { display: flex; }
+    #tableModal .modal-card {
+      background: var(--b1, #fff);
+      border-radius: 0.75rem;
+      max-width: 95vw;
+      width: 100%;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+    #tableModal header {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--b2, #e5e7eb);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    #tableModal .modal-body {
+      padding: 1rem;
+      overflow: auto;
+    }
+    #modalStatusTable th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--b1, #ffffff);
+    }
+    #modalStatusTable tbody th:first-child {
+      z-index: 1;
+    }
+  </style>
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-3xl font-bold">Estado de ventas 2025</h1>
@@ -41,6 +96,7 @@
         <h2 class="text-xl font-semibold">Comparativo por familia</h2>
         <p id="metaInfo" class="text-xs opacity-60"></p>
       </div>
+      <button id="openModal" type="button" class="btn btn-ghost btn-sm">Ver tabla completa</button>
     </div>
     <div class="overflow-x-auto">
       <div class="max-h-[70vh] overflow-y-auto relative">
@@ -48,6 +104,27 @@
           <thead class="sticky top-0 z-10 bg-base-200"></thead>
           <tbody></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tableModal">
+  <div class="modal-card">
+    <header>
+      <div>
+        <p class="text-sm font-semibold">Tabla completa (scroll para ver columnas)</p>
+      </div>
+      <button id="closeModal" type="button" class="btn btn-ghost btn-sm">Cerrar</button>
+    </header>
+    <div class="modal-body">
+      <div class="overflow-x-auto">
+        <div class="overflow-y-auto" style="max-height:70vh;">
+          <table id="modalStatusTable" class="table table-sm w-full text-sm">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -62,6 +139,11 @@ const $zone = document.getElementById('zone');
 const $form = document.getElementById('filters');
 const $table = document.getElementById('statusTable');
 const $meta = document.getElementById('metaInfo');
+const $modal = document.getElementById('tableModal');
+const $modalHead = document.querySelector('#modalStatusTable thead');
+const $modalBody = document.querySelector('#modalStatusTable tbody');
+const $openModal = document.getElementById('openModal');
+const $closeModal = document.getElementById('closeModal');
 
 function resetSelect($el, placeholder) {
   $el.innerHTML = '';
@@ -159,6 +241,11 @@ function renderTable(data) {
     }).join('');
 
   tbody.innerHTML = bodyRows;
+  // Copiamos al modal
+  if ($modalHead && $modalBody) {
+    $modalHead.innerHTML = thead.innerHTML;
+    $modalBody.innerHTML = bodyRows;
+  }
 
   const meta = data.meta || {};
   const period = meta.start_date && meta.end_date ? `${meta.start_date} a ${meta.end_date}` : '';
@@ -175,6 +262,12 @@ function fetchData() {
 }
 
 $form.addEventListener('submit', e => { e.preventDefault(); fetchData(); });
+
+$openModal?.addEventListener('click', () => { $modal?.classList.add('active'); });
+$closeModal?.addEventListener('click', () => { $modal?.classList.remove('active'); });
+$modal?.addEventListener('click', e => {
+  if (e.target === $modal) $modal.classList.remove('active');
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   if ($region.value) { await loadZones($region.value); }
