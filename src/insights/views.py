@@ -10,25 +10,6 @@ from sales.models import SalesRecord
 from stock.models import StockRecord
 
 
-def _safe_int(x, default):
-    try:
-        return int(x)
-    except Exception:
-        return default
-
-def _target_dates(pivot_year:int, mm:int, dd:int):
-    # fechas equivalentes (misma MM-DD) en pivot, pivot-1, pivot-2, si están dentro del período
-    out = []
-    for y in [pivot_year-2, pivot_year-1, pivot_year]:
-        s, e = christmas_period(y)
-        try:
-            d = date(y, mm, dd)
-        except ValueError:
-            continue
-        if s <= d <= e:
-            out.append((y, d))
-    return out  # orden cronológico ascendente
-
 def overview_view(request):
     # UI: filtros en cascada + fecha (por defecto hoy si está en período, si no, último día del período del último año con datos)
     regions = Region.objects.order_by("name")
@@ -37,14 +18,6 @@ def overview_view(request):
         "regions": regions,
         "families": families,
     })
-
-
-def _safe_int(x, default):
-    try:
-        return int(x)
-    except Exception:
-        return default
-
 
 def overview_data(request):
     """
@@ -70,29 +43,6 @@ def overview_data(request):
     s_act, e_act   = christmas_period(pivot)
     s_prev, e_prev = christmas_period(prev_year)
 
-    # ---------- Fecha de corte (default = ayer) ----------
-    yesterday = date.today() - timedelta(days=1)
-
-    if cut_str:
-        try:
-            t = date.fromisoformat(cut_str)
-        except ValueError:
-            t = yesterday
-    else:
-        t = yesterday
-
-    # forzamos año pivot
-    try:
-        target = date(pivot, t.month, t.day)
-    except ValueError:
-        target = e_act
-
-    # clamp al período navideño
-    if target < s_act:
-        target = s_act
-    if target > e_act:
-        target = e_act
-
     # ---------- Filtros de ámbito (Store) ----------
     base = {}
 
@@ -115,6 +65,34 @@ def overview_data(request):
         base["store__is_distribution_center"] = False
     elif source == "cdr":
         base["store__is_distribution_center"] = True
+
+    # ---------- Fecha de corte real del año pivot ----------
+    latest_sales_date = (
+        SalesRecord.objects
+        .filter(date__range=(s_act, e_act), **base)
+        .aggregate(Max("date"))
+        .get("date__max")
+    )
+
+    if cut_str:
+        try:
+            t = date.fromisoformat(cut_str)
+        except ValueError:
+            t = latest_sales_date or (date.today() - timedelta(days=1))
+    else:
+        t = latest_sales_date or (date.today() - timedelta(days=1))
+
+    try:
+        target = date(pivot, t.month, t.day)
+    except ValueError:
+        target = latest_sales_date or e_act
+
+    if target < s_act:
+        target = s_act
+
+    max_target = latest_sales_date or e_act
+    if target > max_target:
+        target = max_target
 
     # ---------- 1) UV Act Acum (año pivot, 1/oct -> target) ----------
     s_act_start, _ = christmas_period(pivot)
@@ -214,7 +192,9 @@ def overview_data(request):
         "meta": {
             "pivot_year": pivot,
             "prev_year": prev_year,
+            "period_start": s_act.isoformat(),
             "cut_date": target.isoformat(),
+            "latest_sales_date": (latest_sales_date or target).isoformat(),
             "stock_date": (last_stock_date or target).isoformat(),
             "note": "UV Act: 1/oct-fecha corte año actual (agregado por familia). UV Ant: 1/oct-31/dic año anterior.",
         },
