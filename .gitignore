@@ -27,6 +27,8 @@ local_settings.py
 *.local
 
 node_modules/
+src/theme/static_src/node_modules/
+src/staticfiles/
 
 
 npm-debug.log
