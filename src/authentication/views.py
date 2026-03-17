@@ -6,8 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.urls import reverse
-from django.http import HttpResponseForbidden, JsonResponse
-from django.views.decorators.http import require_POST
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.conf import settings
 from .models import LoginToken
 from .email_service import send_login_email
@@ -20,6 +19,19 @@ ALLOWED_DOMAIN = "@laanonima.com.ar"
 TOKEN_EXPIRY_MINUTES = 30  # Token válido por 30 minutos
 
 
+def _get_safe_next_url(request, candidate: str) -> str:
+    if not candidate:
+        return ""
+
+    if url_has_allowed_host_and_scheme(
+        candidate,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return candidate
+    return ""
+
+
 class LoginRequestView(View):
     """
     Vista para solicitar acceso por email corporativo.
@@ -30,24 +42,30 @@ class LoginRequestView(View):
         """Mostrar formulario de solicitud de login"""
         if request.user.is_authenticated:
             return redirect('home')
-        context = {"allowed_domain": ALLOWED_DOMAIN}
+        context = {
+            "allowed_domain": ALLOWED_DOMAIN,
+            "next_url": _get_safe_next_url(request, request.GET.get("next", "")),
+        }
         return render(request, "authentication/login_request.html", context)
 
     def post(self, request):
         """Procesar solicitud de login por email"""
         email = request.POST.get("email", "").strip().lower()
+        next_url = _get_safe_next_url(request, request.POST.get("next", ""))
         
         if not email:
             return render(request, "authentication/login_request.html", {
                 "error": "Por favor ingresa tu email.",
-                "allowed_domain": ALLOWED_DOMAIN
+                "allowed_domain": ALLOWED_DOMAIN,
+                "next_url": next_url,
             })
 
         # Validar dominio corporativo
         if not email.endswith(ALLOWED_DOMAIN):
             return render(request, "authentication/login_request.html", {
                 "error": f"Solo se permiten emails del dominio {ALLOWED_DOMAIN}",
-                "allowed_domain": ALLOWED_DOMAIN
+                "allowed_domain": ALLOWED_DOMAIN,
+                "next_url": next_url,
             })
 
         # Crear o reutilizar usuario
@@ -71,9 +89,10 @@ class LoginRequestView(View):
         )
 
         # Construir link de login
-        login_link = request.build_absolute_uri(
-            reverse('authentication:verify_token', kwargs={"token": token})
-        )
+        login_path = reverse('authentication:verify_token', kwargs={"token": token})
+        if next_url:
+            login_path = f"{login_path}?next={next_url}"
+        login_link = request.build_absolute_uri(login_path)
 
         # Enviar email (o log en desarrollo)
         send_login_email(email, login_link, TOKEN_EXPIRY_MINUTES)
@@ -96,6 +115,7 @@ class VerifyTokenView(View):
     
     def get(self, request, token):
         """Verificar token e iniciar sesión"""
+        next_url = _get_safe_next_url(request, request.GET.get("next", ""))
         try:
             login_token = LoginToken.objects.get(token=token)
         except LoginToken.DoesNotExist:
@@ -115,7 +135,9 @@ class VerifyTokenView(View):
 
         logger.info(f"Usuario {login_token.email} autenticado exitosamente")
 
-        return redirect('home')
+        if next_url:
+            return redirect(next_url)
+        return redirect(settings.LOGIN_REDIRECT_URL)
 
 
 class LogoutView(View):

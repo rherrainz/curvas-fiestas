@@ -26,6 +26,9 @@
           <!-- Form -->
           <form method="post" class="space-y-4 sm:space-y-5 text-left">
             {% csrf_token %}
+            {% if next_url %}
+              <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
             
             <div class="form-control max-w-md">
               <label class="label p-0 mb-2">
